@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">BlePlugin</string>
+    <string name="ble_not_support">手机不支持低功耗蓝牙功能</string>
+    <string name="ble_not_open">请打开蓝牙</string>
+</resources>

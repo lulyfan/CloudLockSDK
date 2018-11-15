@@ -1,0 +1,3 @@
+include ':app', ':mylibrary'
+include ':iot-ble-plugin'
+include 'unilink'
