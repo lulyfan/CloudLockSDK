@@ -1,7 +1,6 @@
 package ut.com.cloudlocksdk;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -9,14 +8,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.ut.unilink.cloudLock.UTBleDevice;
+import com.ut.unilink.cloudLock.ScanDevice;
 
 import java.util.List;
 
 public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder>{
 
     private final Context mContext;
-    private List<UTBleDevice> UTBleDevices;
+    private List<ScanDevice> ScanDevices;
 
     public DeviceAdapter(Context context) {
         mContext = context;
@@ -32,7 +31,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        UTBleDevice clocdLock = UTBleDevices.get(position);
+        ScanDevice clocdLock = ScanDevices.get(position);
         holder.address.setText(clocdLock.getAddress());
 
         if (itemClickListener != null) {
@@ -42,11 +41,11 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 
     @Override
     public int getItemCount() {
-        return UTBleDevices == null ? 0 : UTBleDevices.size();
+        return ScanDevices == null ? 0 : ScanDevices.size();
     }
 
-    public void setUTBleDevices(List<UTBleDevice> UTBleDevices) {
-        this.UTBleDevices = UTBleDevices;
+    public void setScanDevices(List<ScanDevice> scanDevices) {
+        this.ScanDevices = scanDevices;
         notifyDataSetChanged();
     }
 
@@ -56,8 +55,8 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
         this.itemClickListener = itemClickListener;
     }
 
-    public List<UTBleDevice> getUTBleDevices() {
-        return UTBleDevices;
+    public List<ScanDevice> getScanDevices() {
+        return ScanDevices;
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder{

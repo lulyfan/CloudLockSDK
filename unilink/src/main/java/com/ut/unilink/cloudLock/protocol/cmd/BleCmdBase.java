@@ -26,7 +26,11 @@ public abstract class BleCmdBase<T> {
 
     private void wrapSend(ClientHelper.ResponseListener responseListener) {
 
-        autoIncreaseNum = (autoIncreaseNum + 1) % 65535;
+        autoIncreaseNum = (autoIncreaseNum + 1) % 65536;
+        if (autoIncreaseNum == 0) {
+            autoIncreaseNum ++;
+        }
+
         BleMsg msg = build();
         clientHelper.asyncSend(msg, responseListener);
     }

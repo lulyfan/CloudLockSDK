@@ -45,7 +45,7 @@ public class Test {
         buffer.put(new byte[]{(byte) 0xA4, 0x00});                    //lock type
         buffer.put(new byte[]{0x01, 0x02, 0x03, 0x04, 0x05, 0x06});   //mac
 
-        scanCallback.setVendorId("aaaa");
+        scanCallback.setVendorId("aaaa".getBytes());
         scanCallback.setDeviceType(new byte[]{(byte) 0xA4, 0x00});
         boolean result = scanCallback.onFilter(null, 0, buffer.array());
 

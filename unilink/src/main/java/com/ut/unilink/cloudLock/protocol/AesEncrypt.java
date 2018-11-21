@@ -17,6 +17,6 @@ public class AesEncrypt implements IEncrypt{
 
     @Override
     public byte[] decrypt(byte[] src) {
-        return AES.encrypt(src, key);
+        return AES.decrypt(src, key);
     }
 }

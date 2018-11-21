@@ -13,8 +13,9 @@ import android.widget.Toast;
 
 import com.ut.unilink.UnilinkManager;
 import com.ut.unilink.cloudLock.ScanListener;
-import com.ut.unilink.cloudLock.UTBleDevice;
+import com.ut.unilink.cloudLock.ScanDevice;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -33,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         initUI();
-        unilinkManager = UnilinkManager.getINSTANCE(this);
+        unilinkManager = UnilinkManager.getInstance(this);
     }
 
     @Override
@@ -67,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 int position = recyclerView.getChildAdapterPosition(v);
-                UTBleDevice bleDevice = deviceAdapter.getUTBleDevices().get(position);
+                ScanDevice bleDevice = deviceAdapter.getScanDevices().get(position);
 
                 Intent intent = new Intent(MainActivity.this, LockActivity.class);
                 intent.putExtra("lock", bleDevice);
@@ -85,18 +86,27 @@ public class MainActivity extends AppCompatActivity {
         byte[] deviceType = null;
 
         if (!sVendorId.equals("")) {
-            vendorId = sVendorId.getBytes();
+            int temp = (int) Long.parseLong(sVendorId, 16);
+            ByteBuffer buffer = ByteBuffer.allocate(4);
+            buffer.putInt(temp);
+            vendorId = buffer.array();
         }
 
         if (!sDeviceType.equals("")) {
-            deviceType = sDeviceType.getBytes();
+            short temp = (short) Integer.parseInt(sDeviceType, 16);
+            ByteBuffer buffer = ByteBuffer.allocate(2);
+            buffer.putShort(temp);
+            deviceType = buffer.array();
         }
 
+        deviceAdapter.setScanDevices(null);
+        deviceAdapter.notifyDataSetChanged();
         int result = unilinkManager.scan(new ScanListener() {
             @Override
-            public void onScan(List<UTBleDevice> bleDevice) {
-                deviceAdapter.setUTBleDevices(bleDevice);
+            public void onScan(List<ScanDevice> scanDevices) {
+                deviceAdapter.setScanDevices(scanDevices);
                 deviceAdapter.notifyDataSetChanged();
+
             }
 
             @Override

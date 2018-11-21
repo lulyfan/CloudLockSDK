@@ -10,8 +10,8 @@ public class AESTest {
 
     @Test
     public void encrypt() {
-        byte[] data = new byte[] {0x44, (byte) 0x88, 0x65, 0x0d, (byte) 0xc1, (byte) 0xa7, (byte) 0xa4, (byte) 0xc2, 0x38, (byte) 0x8e, 0x52, (byte) 0xa4, 0x35, (byte) 0xf8, 0x79, 0x2f};
-        byte[] key = new byte[] {-63, 35, 5, 91, 54, 20, -118, -106};
+        byte[] key = new byte[] {-80, -39, -80, 14, -21, -111, -31, 102};
+        byte[] data = new byte[] {0x2f, (byte) 0xce, (byte) 0x91, (byte) 0xc5, 0x10, (byte) 0xcd, (byte) 0xc6, 0x3c, (byte) 0xd1, (byte) 0xdd, (byte) 0xe6, (byte) 0xee, (byte) 0x9f, (byte) 0x8f, (byte) 0xc9, (byte) 0x92};
 
 //        Random random = new Random();
 //        random.nextBytes(data);
@@ -20,8 +20,7 @@ public class AESTest {
         System.out.println(toUnsignedHexString(data));
         System.out.println(toUnsignedHexString(key));
 
-        byte[] encryptData = AES.encrypt(data, key);
-        System.out.println(toUnsignedHexString(encryptData));
+        byte[] encryptData = data;
         System.out.println(toUnsignedHexString(AES.decrypt(encryptData, key)));
     }
 

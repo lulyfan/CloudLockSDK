@@ -1,7 +1,7 @@
 package com.ut.unilink.cloudLock;
 
 /**
- * 连接监听器
+ * 连接监听器，连接云锁时设置。
  */
 public interface ConnectListener {
     /**

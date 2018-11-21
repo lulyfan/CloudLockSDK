@@ -4,7 +4,7 @@ import com.ut.unilink.cloudLock.protocol.BleMsg;
 
 import java.nio.ByteBuffer;
 
-public class WriteVendorId extends BleCmdBase<WriteVendorId.Data>{
+public class WriteVendorId extends BleCmdBase<Void>{
 
     private static final byte CODE = 0x29;
 
@@ -28,7 +28,7 @@ public class WriteVendorId extends BleCmdBase<WriteVendorId.Data>{
     public BleMsg build() {
         BleMsg msg = new BleMsg();
         msg.setCode(CODE);
-        msg.setEncrypt(false);
+        msg.setEncryptType(BleMsg.ENCRYPT_TYPE_FIXED);
 
         ByteBuffer buffer = ByteBuffer.allocate(4 + 2);
         buffer.put(vendorId);
@@ -39,18 +39,7 @@ public class WriteVendorId extends BleCmdBase<WriteVendorId.Data>{
     }
 
     @Override
-    Data parse(BleMsg msg) {
-        byte[] content = msg.getContent();
-        Data data = new Data();
-        data.result = content[0];
-        return data;
-    }
-
-    public static class Data {
-        public byte result;
-
-        public boolean isSuccess() {
-            return result == 1 ? true : false;
-        }
+    Void parse(BleMsg msg) {
+        return null;
     }
 }

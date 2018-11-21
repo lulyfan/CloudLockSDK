@@ -240,14 +240,12 @@ public class AES {
             cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
         } catch (Exception e) {
             e.printStackTrace();
-            Log.i(TAG, "aesCbcNoPaddingEncrypt Exception");
         }
         byte[] encrypted = null;
         try {
             encrypted = cipher.doFinal(result);
         } catch (Exception e) {
             e.printStackTrace();
-            Log.i(TAG, "aesCbcNoPaddingEncrypt  Exception");
         }
         return encrypted;
     }
@@ -260,7 +258,6 @@ public class AES {
             cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
             return cipher.doFinal(sSrc);
         } catch (Exception ex) {
-            Log.i(TAG, "aesCbcNoPaddingDecrypt Exception");
         }
         return null;
     }

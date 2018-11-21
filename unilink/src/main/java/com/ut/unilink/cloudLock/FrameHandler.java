@@ -21,7 +21,7 @@ public class FrameHandler{
 
     /**
      * 负责生成消息帧，并根据消息长度进行相应分包
-     * @param msg 最后一个字节为cmdID, 倒数第二个字节为是否加密标识
+     * @param msg 最后一个字节为cmdID, 倒数第二个字节为是否加密标识, 倒数第三个字节为加密方式标识（动态加密0 固定加密1）
      * @return
      */
     public List<byte[]> handleSend(byte[] msg) {
@@ -32,7 +32,9 @@ public class FrameHandler{
 
         int cmdID = msg[msg.length - 1];
         boolean isEncrypt = msg[msg.length - 2] == 1 ? true : false;
-        byte[] data = new byte[msg.length - 2];
+        byte encryptType = msg[msg.length - 3];
+
+        byte[] data = new byte[msg.length - 3];
         System.arraycopy(msg, 0, data, 0, data.length);
 
         int dataLength = data.length;
@@ -51,8 +53,9 @@ public class FrameHandler{
             frameBuffer.put((byte) dataLength);
 
             byte control = 0;    //控制字
-            control = isEncrypt ? (byte) (control | 0x80) : control;
-            control = (byte) (control | i);
+            control = isEncrypt ? (byte) (control | 0x80) : control;  //设置是否加密
+            control = (byte) (control | (encryptType << 6));          //设置加密类型
+            control = (byte) (control | i);                           //设置帧号
             frameBuffer.put(control);
             frameBuffer.put((byte) cmdID);
 
@@ -83,7 +86,7 @@ public class FrameHandler{
      * 负责解析消息帧，如果消息包含多帧，还要进行消息组装
      * @param data
      * @return 返回帧的内容信息，不包含帧结构信息；当一条消息由多帧组成时，只有接收处理完所有的帧才返回相应内容，否则返回null;
-     *         最后2个字节为附加字节，倒数第一个字节填cmdID， 倒数第二个字节填是否加密（0或1）
+     *         最后3个字节为附加字节，倒数第一个字节填cmdID， 倒数第二个字节填是否加密（0或1）,倒数第三个字节填加密类型(0或1)
      */
     public byte[] handleReceive(byte[] data) {
         if (!check(data)) {
@@ -95,6 +98,7 @@ public class FrameHandler{
         byte msgLength = buffer.get();
         byte control = buffer.get();
         byte isEncrypt = (byte) ((control & 0x80) >>> 7);
+        byte encryptType = (byte) ((control & 0x40) >>> 6);
         int frameNum = control & 0x1F;
         byte cmdID = buffer.get();
 
@@ -112,10 +116,11 @@ public class FrameHandler{
             return null;
         }
 
-        byte[] result = new byte[msgLength + 2];
+        byte[] result = new byte[msgLength + 3];
         System.arraycopy(msgBuffer, 0, result, 0, msgLength);
         result[result.length - 1] = cmdID;
         result[result.length - 2] = isEncrypt;
+        result[result.length - 3] = encryptType;
         currentCmdID = -1;
 
         return result;

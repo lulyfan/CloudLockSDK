@@ -128,9 +128,6 @@ public class MyTea {
         int y = (int) left;
         int z = (int) right;
 
-//        Log.i("tea", "left:" + left + " right:" + right);
-//        Log.i("tea", "a:" + a + " b:" + b + " c:" + c + " d:" + d);
-
         for (int i = 0; i < encryCount; i++) {
             sum += delta;
             y += ((z << 4) + a) ^ (z + sum) ^ ((z >>> 5) + b);

@@ -1,21 +1,20 @@
 package com.ut.unilink.cloudLock;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import com.ut.unilink.cloudLock.protocol.BleClient;
 import com.ut.unilink.cloudLock.protocol.BleMsg;
 import com.ut.unilink.cloudLock.protocol.ClientHelper;
-import com.ut.unilink.cloudLock.protocol.data.BleLockState;
-import com.ut.unilink.cloudLock.protocol.data.DeviceNodeInfo;
+import com.ut.unilink.cloudLock.protocol.data.LockState;
 import com.ut.unilink.util.Log;
 
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class CloundLockConnectionManager implements IConnectionManager {
 
-    private static final int CMD_CLOSE = 0x2C;
     private static final int CMD_DEVICE_STATE = 0x25;
 
     private Map<String, ClientHelper> mBleHelperMap = new HashMap<>();
@@ -44,16 +43,19 @@ public class CloundLockConnectionManager implements IConnectionManager {
                 @Override
                 public void onReceive(BleMsg msg) {
 
-                    if (msg.getCode() == CMD_CLOSE) {
+                  if (msg.getCode() == CMD_DEVICE_STATE) {
 
-                        mUTBleLink.close(deviceUUID);
+                        final LockState lockState = parseLockState(msg);
+                        final LockStateListener lockStateListener = mLockStateListenerMap.get(deviceUUID);
 
-                    } else if (msg.getCode() == CMD_DEVICE_STATE) {
-
-                        BleLockState bleLockState = parseBleStatus(msg);
-                        LockStateListener lockStateListener = mLockStateListenerMap.get(deviceUUID);
                         if (lockStateListener != null) {
-                            lockStateListener.onState(bleLockState);
+                            Handler handler = new Handler(Looper.getMainLooper());
+                            handler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    lockStateListener.onState(lockState);
+                                }
+                            });
                         }
                     }
                 }
@@ -99,35 +101,8 @@ public class CloundLockConnectionManager implements IConnectionManager {
         return mBleHelperMap.get(address);
     }
 
-    private BleLockState parseBleStatus(BleMsg msg) {
-        ByteBuffer buffer = ByteBuffer.wrap(msg.getContent());
-        byte statusNum = buffer.get();
-        List<DeviceNodeInfo> deviceNodeInfoList = new ArrayList<>();
-
-        for (int i=0; i<statusNum; i++) {
-            byte devNo = buffer.get();
-
-            DeviceNodeInfo deviceNodeInfo = new DeviceNodeInfo(devNo);
-            buffer.get(deviceNodeInfo.value);
-            deviceNodeInfoList.add(deviceNodeInfo);
-        }
-
-        BleLockState bleLockState = new BleLockState();
-        for (DeviceNodeInfo deviceNodeInfo : deviceNodeInfoList) {
-            switch (deviceNodeInfo.devNo) {
-                case BleLockState.DEV_NUM_ELEC:
-                    bleLockState.setElect(deviceNodeInfo.value[0] + "");
-                    break;
-
-                case BleLockState.DEV_NUM_LOCK_STATE:
-                    bleLockState.setStatus(deviceNodeInfo.value[0] + "");
-                    break;
-
-                default:
-            }
-        }
-
-        return bleLockState;
+    private LockState parseLockState(BleMsg msg) {
+        return LockState.parseLockState(msg.getContent());
     }
 
     void addLockStateListener(String address, LockStateListener lockStateListener) {

@@ -13,6 +13,7 @@ public class ReadAutoIncreaseNum extends BleCmdBase<ReadAutoIncreaseNum.Data>{
     public BleMsg build() {
         BleMsg msg = new BleMsg();
         msg.setCode(CODE);
+        msg.setEncryptType(BleMsg.ENCRYPT_TYPE_FIXED);
         return msg;
     }
 

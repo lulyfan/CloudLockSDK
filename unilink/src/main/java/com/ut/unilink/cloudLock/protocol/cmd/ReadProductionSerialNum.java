@@ -10,7 +10,7 @@ public class ReadProductionSerialNum extends BleCmdBase<ReadProductionSerialNum.
     public BleMsg build() {
         BleMsg msg = new BleMsg();
         msg.setCode(CODE);
-        msg.setEncrypt(false);
+        msg.setEncryptType(BleMsg.ENCRYPT_TYPE_FIXED);
         return msg;
     }
 

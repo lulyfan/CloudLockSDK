@@ -9,9 +9,9 @@ public interface ScanListener {
 
     /**
      * 搜索到相应设备时调用该方法，当发现新的设备时，会多次调用
-     * @param bleDevice
+     * @param scanDevices 每次搜索到的设备集合
      */
-    void onScan(List<UTBleDevice> bleDevice);
+    void onScan(List<ScanDevice> scanDevices);
 
     /**
      * 搜索结束时调用

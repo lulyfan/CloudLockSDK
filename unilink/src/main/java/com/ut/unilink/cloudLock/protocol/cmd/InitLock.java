@@ -20,7 +20,7 @@ public class InitLock extends BleCmdBase<InitLock.Data>{
         init();
         BleMsg msg = new BleMsg();
         msg.setCode(CODE);
-        msg.setEncrypt(false);
+        msg.setEncryptType(BleMsg.ENCRYPT_TYPE_FIXED);
 
         int contentLength = adminPassword.length + openLockPassword.length + secretKey.length + 1 + 2;
         ByteBuffer buffer = ByteBuffer.allocate(contentLength);
@@ -39,10 +39,7 @@ public class InitLock extends BleCmdBase<InitLock.Data>{
         byte[] content = msg.getContent();
         ByteBuffer buffer = ByteBuffer.wrap(content);
         Data data = new Data();
-        data.result = buffer.get();
-        data.versionNum = buffer.get();
-        data.editionNum = buffer.get();
-        data.realeaseNum = buffer.get();
+        buffer.get(data.version);
         return data;
     }
 
@@ -51,8 +48,7 @@ public class InitLock extends BleCmdBase<InitLock.Data>{
         random.nextBytes(adminPassword);
         random.nextBytes(openLockPassword);
         random.nextBytes(secretKey);
-//        encryptVersion = (byte) random.nextInt(1);
-        encryptVersion = 1;
+        encryptVersion = (byte) random.nextInt(1);
     }
 
     public byte[] getAdminPassword() {
@@ -72,9 +68,6 @@ public class InitLock extends BleCmdBase<InitLock.Data>{
     }
 
     public static class Data {
-        public byte result;           //设置结果，1成功，0失败
-        public byte versionNum;       //版本号
-        public byte editionNum;       //版次号
-        public byte realeaseNum;      //发布号
+       public byte[] version = new byte[3];
     }
 }

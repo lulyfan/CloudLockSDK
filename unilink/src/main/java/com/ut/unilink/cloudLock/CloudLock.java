@@ -5,24 +5,32 @@ import com.ut.unilink.cloudLock.protocol.data.ProductInfo;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * <p>表示云锁设备。
+ * <p>当搜索到未激活的云锁设备时，通过调用{@link com.ut.unilink.UnilinkManager#initLock(ScanDevice, CallBack)}初始化云锁可以得到CloudLock对象，
+ *里面保存了云锁设备的相关配置信息，再调用{@link com.ut.unilink.UnilinkManager#confirmInit(CloudLock, CallBack)}确认初始化完成激活
+ */
 public class CloudLock {
 
     private byte[] adminPassword;
     private byte[] openLockPassword;
     private byte[] entryptKey;
-    private int encryptVersion = -1;
+    private int encryptType = -1;
     private int autuIncreaseNum;
-    private UTBleDevice bleDevice;
-    private byte[] serialNum;      //生产序列号
+    private ScanDevice bleDevice;
     private byte currentDeviceNum;          //当前想要读取的设备编号，用于读取从设备节点信息命令
     private Map<Byte, byte[]> deviceInfoMap = new HashMap<>();
     private ProductInfo productInfo;
 
-    public CloudLock(String address) {
-        bleDevice = new UTBleDevice();
-        bleDevice.setAddress(address);
+    public CloudLock(String mac) {
+        bleDevice = new ScanDevice();
+        bleDevice.setAddress(mac);
     }
 
+    /**
+     * 获取云锁设备mac地址
+     * @return 6字节mac地址
+     */
     public String getAddress() {
         if (bleDevice == null) {
             return null;
@@ -30,18 +38,46 @@ public class CloudLock {
         return bleDevice.getAddress();
     }
 
-    public UTBleDevice getBleDevice() {
+    public ScanDevice getBleDevice() {
         return bleDevice;
     }
 
-    public void setBleDevice(UTBleDevice bleDevice) {
+    public void setBleDevice(ScanDevice bleDevice) {
         this.bleDevice = bleDevice;
+
+        if (bleDevice != null) {
+            setVendorId(bleDevice.getVendorId());
+        }
     }
 
+    /**
+     * 获取云锁激活状态
+     * @return 激活状态
+     */
+    public boolean isActive() {
+        return bleDevice.isActive();
+    }
+
+    /**
+     * 设置云锁激活状态
+     * @param active
+     */
+    public void setActive(boolean active) {
+        bleDevice.setActive(active);
+    }
+
+    /**
+     * 获取管理员密码
+     * @return 6字节管理员密码
+     */
     public byte[] getAdminPassword() {
         return adminPassword;
     }
 
+    /**
+     * 设置管理员密码
+     * @param adminPassword 长度为6的字节数组
+     */
     public void setAdminPassword(byte[] adminPassword) {
         this.adminPassword = adminPassword;
     }
@@ -50,6 +86,10 @@ public class CloudLock {
         return openLockPassword;
     }
 
+    /**
+     * 设置开锁密码
+     * @param openLockPassword 长度为6的字节数组
+     */
     public void setOpenLockPassword(byte[] openLockPassword) {
         this.openLockPassword = openLockPassword;
     }
@@ -58,16 +98,24 @@ public class CloudLock {
         return entryptKey;
     }
 
+    /**
+     * 设置加密密钥
+     * @param entryptKey 长度为8的字节数组
+     */
     public void setEntryptKey(byte[] entryptKey) {
         this.entryptKey = entryptKey;
     }
 
-    public int getEncryptVersion() {
-        return encryptVersion;
+    public int getEncryptType() {
+        return encryptType;
     }
 
-    public void setEncryptVersion(int encryptVersion) {
-        this.encryptVersion = encryptVersion;
+    /**
+     * 设置加密方式
+     * @param encryptType 0：TEA加密   1：AES加密
+     */
+    public void setEncryptType(int encryptType) {
+        this.encryptType = encryptType;
     }
 
     public int getAutuIncreaseNum() {
@@ -78,8 +126,15 @@ public class CloudLock {
         this.autuIncreaseNum = autuIncreaseNum;
     }
 
+    /**
+     * 获取生产序列号
+     * @return 6字节生产序列号
+     */
     public byte[] getSerialNum() {
-        return serialNum;
+        if (productInfo == null) {
+            return null;
+        }
+        return productInfo.getSerialNum();
     }
 
     /**
@@ -87,14 +142,21 @@ public class CloudLock {
      * @param serialNum 数组长度为6
      */
     public void setSerialNum(byte[] serialNum) {
-        this.serialNum = serialNum;
+        if (productInfo == null) {
+            productInfo = new ProductInfo();
+        }
+        productInfo.setSerialNum(serialNum);
     }
 
+    /**
+     * 获取产商标识
+     * @return 4字节产商标识
+     */
     public byte[] getVendorId() {
-        if (bleDevice == null) {
+        if (productInfo == null) {
             return null;
         }
-        return bleDevice.getVendorId();
+        return productInfo.getVendorId();
     }
 
     /**
@@ -102,11 +164,16 @@ public class CloudLock {
      * @param vendorId 数组长度为4
      */
     public void setVendorId(byte[] vendorId) {
-        if (bleDevice != null) {
-            bleDevice.setVendorId(vendorId);
+        if (productInfo == null) {
+            productInfo = new ProductInfo();
         }
+        productInfo.setVendorId(vendorId);
     }
 
+    /**
+     * 获取设备类型
+     * @return 2字节设备类型
+     */
     public byte[] getDeviceType() {
         if (bleDevice == null) {
             return null;
@@ -125,21 +192,33 @@ public class CloudLock {
     }
 
     /**
-     * 设置当前要去读取得设备节点编号
+     * 设置当前要读取的设备节点编号
      * @param deviceNum
      */
     public void setDeviceNum(byte deviceNum) {
         this.currentDeviceNum = deviceNum;
     }
 
+    /**
+     * 获取当前要读取的设备节点编号
+     * @return 设备节点编号
+     */
     public byte getDeviceNum() {
         return currentDeviceNum;
     }
 
+    /**
+     * 获取设备的所有节点信息
+     * @return 设备节点信息Map
+     */
     public Map getDeviceInfoMap() {
         return deviceInfoMap;
     }
 
+    /**
+     * 设置设备的所有节点信息
+     * @param deviceInfoMap
+     */
     public void setDeviceInfoMap(Map<Byte, byte[]> deviceInfoMap) {
         this.deviceInfoMap = deviceInfoMap;
     }
@@ -147,7 +226,7 @@ public class CloudLock {
     /**
      * 获取指定设备节点信息
      * @param deviceNum
-     * @return
+     * @return 设备节点信息
      */
     public byte[] getDeviceInfo(byte deviceNum) {
         return deviceInfoMap.get(deviceNum);
@@ -162,11 +241,30 @@ public class CloudLock {
         deviceInfoMap.put(deviceNum, deviceInfo);
     }
 
+    /**
+     * 获取设备的产品信息
+     * @return 产品信息
+     */
     public ProductInfo getProductInfo() {
         return productInfo;
     }
 
+    /**
+     * 设置设备的产品信息
+     * @param productInfo
+     */
     public void setProductInfo(ProductInfo productInfo) {
         this.productInfo = productInfo;
+    }
+
+    /**
+     * 获取设备的版本
+     * @return
+     */
+    public byte[] getVersion() {
+        if (productInfo == null) {
+            return null;
+        }
+        return productInfo.getVersion();
     }
 }

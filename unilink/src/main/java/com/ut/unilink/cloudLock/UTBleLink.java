@@ -81,14 +81,14 @@ public class UTBleLink {
             @Override
             public void onDeviceFound(BleDevice bleDevice, List<BleDevice> result) {
                 if (scanListener != null) {
-                    List<UTBleDevice> utBleDevices = new ArrayList<>();
+                    List<ScanDevice> scanDevices = new ArrayList<>();
                     for (BleDevice device : result) {
-                        UTBleDevice utBleDevice = new UTBleDevice();
-                        utBleDevice.setBleDevice(device);
-                        utBleDevice.setAddress(device.getDeviceUUID());
-                        utBleDevices.add(utBleDevice);
+                        ScanDevice scanDevice = new ScanDevice();
+                        scanDevice.setBleDevice(device);
+                        scanDevice.setAddress(device.getDeviceUUID());
+                        scanDevices.add(scanDevice);
                     }
-                    scanListener.onScan(utBleDevices);
+                    scanListener.onScan(scanDevices);
                 }
             }
 
@@ -116,7 +116,7 @@ public class UTBleLink {
 
     /**
      * 连接指定云锁设备
-     * @param address 云锁设备MAC地址，可以从搜索获取的云锁设备{@link UTBleDevice#getAddress()}得到
+     * @param address 云锁设备MAC地址，可以从搜索获取的云锁设备{@link ScanDevice#getAddress()}得到
      * @param connectListener 连接结果监听器
      */
     public void connect(String address, final ConnectListener connectListener) {
@@ -175,7 +175,6 @@ public class UTBleLink {
 
             @Override
             public void onConnect(BleDevice bleDevice) {
-                System.out.println("onConnect");
             }
 
             @Override
@@ -233,11 +232,11 @@ public class UTBleLink {
             }
 
             isSending = true;
-            Log.i("lock", "start write:" + Log.toUnsignedHex(data));
+            Log.i("start write:" + Log.toUnsignedHex(data));
             Ble.get().write(deviceUUID, UUID_SERVICE, UUID_WRITE_CHARACTERISTIC, data, new IWriteCallback() {
                 @Override
                 public void onWrite(UUID serviceUUID, UUID characteristicUUID) {
-                    Log.i("lock", "ble write success");
+                    Log.i("ble write success");
                     handleSendEnd();
 
 //                    handler.postDelayed(() -> {}, 20);
@@ -245,7 +244,7 @@ public class UTBleLink {
 
                 @Override
                 public void onFailure(BleDevice bleDevice, int code, String message) {
-                    Log.i("lock", "ble write failed");
+                    Log.i("ble write failed");
                     handleSendEnd();
                 }
             });
@@ -277,7 +276,7 @@ public class UTBleLink {
         return mConnectionManager;
     }
 
-    public boolean isConnect(UTBleDevice device) {
+    public boolean isConnect(ScanDevice device) {
         return Ble.get().isConnected(device.getAddress());
     }
 

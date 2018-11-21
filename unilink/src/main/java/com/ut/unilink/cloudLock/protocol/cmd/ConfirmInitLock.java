@@ -16,6 +16,7 @@ public class ConfirmInitLock extends BleCmdBase<Void>{
     @Override
     public BleMsg build() {
         BleMsg msg = new BleMsg();
+        msg.setEncryptType(BleMsg.ENCRYPT_TYPE_FIXED);
         msg.setCode(CODE);
         msg.setContent(adminPassword);
         return msg;

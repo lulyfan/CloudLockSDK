@@ -12,7 +12,7 @@ public class ReadVendorId extends BleCmdBase<ReadVendorId.Data> {
     public BleMsg build() {
         BleMsg msg = new BleMsg();
         msg.setCode(CODE);
-        msg.setEncrypt(false);
+        msg.setEncryptType(BleMsg.ENCRYPT_TYPE_FIXED);
         return msg;
     }
 

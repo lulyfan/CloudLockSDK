@@ -7,6 +7,7 @@ import com.ut.unilink.cloudLock.protocol.ClientHelper;
 import com.ut.unilink.cloudLock.protocol.TeaEncrypt;
 import com.ut.unilink.cloudLock.protocol.cmd.BleCallBack;
 import com.ut.unilink.cloudLock.protocol.cmd.BleCmdBase;
+import com.ut.unilink.cloudLock.protocol.cmd.ConfirmInitLock;
 import com.ut.unilink.cloudLock.protocol.cmd.ErrCode;
 import com.ut.unilink.cloudLock.protocol.cmd.GetProductInfo;
 import com.ut.unilink.cloudLock.protocol.cmd.InitLock;
@@ -61,35 +62,36 @@ public class Unilink extends UTBleLink {
     /**
      * 连接指定蓝牙设备
      *
-     * @param bleDevice         蓝牙低功耗设备
+     * @param scanDevice         蓝牙低功耗设备
      * @param connectListener   监听连接结果
      * @param lockStateListener 连接成功后，监听云锁的状态信息
      */
-    public void connect(UTBleDevice bleDevice, ConnectListener connectListener, LockStateListener lockStateListener) {
-        connect(bleDevice.getAddress(), connectListener, lockStateListener);
+    public void connect(ScanDevice scanDevice, ConnectListener connectListener, LockStateListener lockStateListener) {
+        connect(scanDevice.getAddress(), connectListener, lockStateListener);
     }
 
     /**
      * 连接指定蓝牙设备
      *
-     * @param bleDevice       蓝牙低功耗设备
+     * @param scanDevice       蓝牙低功耗设备
      * @param connectListener 监听连接结果
      */
-    public void connect(UTBleDevice bleDevice, ConnectListener connectListener) {
-        super.connect(bleDevice.getAddress(), connectListener);
+    public void connect(ScanDevice scanDevice, ConnectListener connectListener) {
+        super.connect(scanDevice.getAddress(), connectListener);
     }
 
     /**
      * 初始化云锁设备
      *
-     * @param bleDevice 蓝牙低功耗设备
+     * @param scanDevice 蓝牙低功耗设备
      * @param callBack  操作回调接口，初始化成功会返回CloudLock对象
      */
-    public void initLock(final UTBleDevice bleDevice, final CallBack callBack) {
+    public void initLock(final ScanDevice scanDevice, final CallBack callBack) {
 
-        final String address = bleDevice.getAddress();
+        final String address = scanDevice.getAddress();
         final ClientHelper clientHelper = mConnectionManager.getBleHelper(address);
         if (clientHelper == null) {
+            callBack.onFailed(ErrCode.ERR_NO_CONNECT, ErrCode.getMessage(ErrCode.ERR_NO_CONNECT));
             return;
         }
 
@@ -101,11 +103,15 @@ public class Unilink extends UTBleLink {
 
                 if (callBack != null) {
                     CloudLock cloudLock = new CloudLock(address);
-                    cloudLock.setBleDevice(bleDevice);
+                    cloudLock.setBleDevice(scanDevice);
                     cloudLock.setAdminPassword(initLock.getAdminPassword());
                     cloudLock.setOpenLockPassword(initLock.getOpenLockPassword());
                     cloudLock.setEntryptKey(initLock.getSecretKey());
-                    cloudLock.setEncryptVersion(initLock.getEncryptVersion());
+                    cloudLock.setEncryptType(initLock.getEncryptVersion());
+
+                    ProductInfo productInfo = new ProductInfo();
+                    productInfo.setVersion(data.version);
+                    cloudLock.setProductInfo(productInfo);
                     setEncryptType(address, initLock.getEncryptVersion(), initLock.getSecretKey());
 
                     callBack.onSuccess(cloudLock);
@@ -123,6 +129,51 @@ public class Unilink extends UTBleLink {
             @Override
             public void timeout() {
 
+                if (callBack != null) {
+                    callBack.onFailed(ERR_TIMEOUT, ErrCode.getMessage(ERR_TIMEOUT));
+                }
+            }
+        });
+    }
+
+    /**
+     * 确认初始化
+     * @param lock
+     * @param callBack
+     */
+    public void confirmInit(final CloudLock lock, final CallBack callBack) {
+
+        if (lock == null) {
+            throw new NullPointerException("CloudLock对象不能为null");
+        }
+
+        final String address = lock.getAddress();
+        final ClientHelper clientHelper = mConnectionManager.getBleHelper(address);
+        if (clientHelper == null) {
+            callBack.onFailed(ErrCode.ERR_NO_CONNECT, ErrCode.getMessage(ErrCode.ERR_NO_CONNECT));
+            return;
+        }
+
+        ConfirmInitLock confirmInitLock = new ConfirmInitLock(lock.getAdminPassword());
+        confirmInitLock.setClientHelper(clientHelper);
+        confirmInitLock.sendMsg(new BleCallBack<Void>() {
+            @Override
+            public void success(Void result) {
+                if (callBack != null) {
+                    lock.setActive(true);
+                    callBack.onSuccess(lock);
+                }
+            }
+
+            @Override
+            public void fail(int errCode, String errMsg) {
+                if (callBack != null) {
+                    callBack.onFailed(errCode, errMsg);
+                }
+            }
+
+            @Override
+            public void timeout() {
                 if (callBack != null) {
                     callBack.onFailed(ERR_TIMEOUT, ErrCode.getMessage(ERR_TIMEOUT));
                 }
@@ -152,39 +203,35 @@ public class Unilink extends UTBleLink {
     /**
      * 对指定云锁设备进行开锁操作
      *
-     * @param lock     表示某个云锁设备， 初始化云锁成功后{@link #initLock(UTBleDevice, CallBack)}会返回相应CloudLock对象
+     * @param lock     表示某个云锁设备， 初始化云锁成功后{@link #initLock(ScanDevice, CallBack)}会返回相应CloudLock对象
      * @param callBack 操作回调接口
      */
     public void openLock(final CloudLock lock, final CallBack callBack) {
 
         if (lock == null) {
-            return;
+            throw new NullPointerException("CloudLock对象不能为null");
         }
 
         ClientHelper clientHelper = mConnectionManager.getBleHelper(lock.getAddress());
         if (clientHelper == null) {
+            callBack.onFailed(ErrCode.ERR_NO_CONNECT, ErrCode.getMessage(ErrCode.ERR_NO_CONNECT));
             return;
         }
 
-        setEncryptType(lock.getAddress(), lock.getEncryptVersion(), lock.getEntryptKey());
+        setEncryptType(lock.getAddress(), lock.getEncryptType(), lock.getEntryptKey());
         final WriteDeviceInfo openLock = new WriteDeviceInfo(lock.getOpenLockPassword(), (byte) 1, new byte[]{1});
         openLock.setClientHelper(clientHelper);
-        openLock.sendMsg(new BleCallBack<WriteDeviceInfo.Data>() {
+        openLock.sendMsg(new BleCallBack<Void>() {
             @Override
-            public void success(WriteDeviceInfo.Data result) {
+            public void success(Void result) {
                 if (callBack != null) {
-                    if (result.isSuccess()) {
-                        callBack.onSuccess(lock);
-                    } else {
-                        callBack.onFailed(ErrCode.ERR_OPENLOCK, ErrCode.getMessage(ErrCode.ERR_OPENLOCK));
-                    }
-
+                    callBack.onSuccess(lock);
                 }
             }
 
             @Override
             public void fail(int errCode, String errMsg) {
-                handleErrCode(lock, errCode, errMsg, openLock, callBack);
+                handleErrCode(lock, errCode, errMsg, openLock, callBack, this);
             }
 
             @Override
@@ -199,36 +246,35 @@ public class Unilink extends UTBleLink {
     /**
      * 重置指定云锁设备
      *
-     * @param lock     表示某个云锁设备， 初始化云锁成功后{@link #initLock(UTBleDevice, CallBack)}会返回相应CloudLock对象
+     * @param lock     表示某个云锁设备， 初始化云锁成功后{@link #initLock(ScanDevice, CallBack)}会返回相应CloudLock对象
      * @param callBack 操作回调接口
      */
     public void resetLock(final CloudLock lock, final CallBack callBack) {
 
         if (lock == null) {
-            return;
+            throw new NullPointerException("CloudLock对象不能为null");
         }
 
         ClientHelper clientHelper = mConnectionManager.getBleHelper(lock.getAddress());
         if (clientHelper == null) {
+            callBack.onFailed(ErrCode.ERR_NO_CONNECT, ErrCode.getMessage(ErrCode.ERR_NO_CONNECT));
             return;
         }
 
-        setEncryptType(lock.getAddress(), lock.getEncryptVersion(), lock.getEntryptKey());
+        setEncryptType(lock.getAddress(), lock.getEncryptType(), lock.getEntryptKey());
         final ResetLock resetLock = new ResetLock(lock.getAdminPassword());
         resetLock.setClientHelper(clientHelper);
-        resetLock.sendMsg(new BleCallBack<ResetLock.Data>() {
+        resetLock.sendMsg(new BleCallBack<Void>() {
             @Override
-            public void success(ResetLock.Data result) {
+            public void success(Void result) {
                 if (callBack != null) {
-                    if (result.isSuccess()) {
-                        callBack.onSuccess(lock);
-                    }
+                    callBack.onSuccess(lock);
                 }
             }
 
             @Override
             public void fail(int errCode, String errMsg) {
-                handleErrCode(lock, errCode, errMsg, resetLock, callBack);
+                handleErrCode(lock, errCode, errMsg, resetLock, callBack, this);
             }
 
             @Override
@@ -247,15 +293,17 @@ public class Unilink extends UTBleLink {
      */
     public void readDeviceInfo(final CloudLock lock, final CallBack callBack) {
         if (lock == null) {
-            return;
+            throw new NullPointerException("CloudLock对象不能为null");
         }
 
         ClientHelper clientHelper = mConnectionManager.getBleHelper(lock.getAddress());
         if (clientHelper == null) {
+            callBack.onFailed(ErrCode.ERR_NO_CONNECT, ErrCode.getMessage(ErrCode.ERR_NO_CONNECT));
             return;
         }
 
-        setEncryptType(lock.getAddress(), lock.getEncryptVersion(), lock.getEntryptKey());
+        setEncryptType(lock.getAddress(), lock.getEncryptType(), lock.getEntryptKey());
+
         final ReadDeviceInfo readDeviceInfo = new ReadDeviceInfo(lock.getDeviceNum());
         readDeviceInfo.setClientHelper(clientHelper);
         readDeviceInfo.sendMsg(new BleCallBack<ReadDeviceInfo.Data>() {
@@ -269,7 +317,7 @@ public class Unilink extends UTBleLink {
 
             @Override
             public void fail(int errCode, String errMsg) {
-                handleErrCode(lock, errCode, errMsg, readDeviceInfo, callBack);
+                handleErrCode(lock, errCode, errMsg, readDeviceInfo, callBack, this);
             }
 
             @Override
@@ -289,15 +337,16 @@ public class Unilink extends UTBleLink {
      */
     public void readMutilDeviceInfo(final CloudLock lock, final CallBack callBack) {
         if (lock == null) {
-            return;
+            throw new NullPointerException("CloudLock对象不能为null");
         }
 
         ClientHelper clientHelper = mConnectionManager.getBleHelper(lock.getAddress());
         if (clientHelper == null) {
+            callBack.onFailed(ErrCode.ERR_NO_CONNECT, ErrCode.getMessage(ErrCode.ERR_NO_CONNECT));
             return;
         }
 
-        setEncryptType(lock.getAddress(), lock.getEncryptVersion(), lock.getEntryptKey());
+        setEncryptType(lock.getAddress(), lock.getEncryptType(), lock.getEntryptKey());
         final ReadDeviceMutilInfo readDeviceMutilInfo = new ReadDeviceMutilInfo();
         readDeviceMutilInfo.setClientHelper(clientHelper);
         readDeviceMutilInfo.sendMsg(new BleCallBack<ReadDeviceMutilInfo.Data>() {
@@ -324,7 +373,7 @@ public class Unilink extends UTBleLink {
 
             @Override
             public void fail(int errCode, String errMsg) {
-                handleErrCode(lock, errCode, errMsg, readDeviceMutilInfo, callBack);
+                handleErrCode(lock, errCode, errMsg, readDeviceMutilInfo, callBack, this);
             }
 
             @Override
@@ -343,15 +392,15 @@ public class Unilink extends UTBleLink {
      */
     public void getProductInfo(final CloudLock lock, final CallBack callBack) {
         if (lock == null) {
-            return;
+            throw new NullPointerException("CloudLock对象不能为null");
         }
 
         ClientHelper clientHelper = mConnectionManager.getBleHelper(lock.getAddress());
         if (clientHelper == null) {
+            callBack.onFailed(ErrCode.ERR_NO_CONNECT, ErrCode.getMessage(ErrCode.ERR_NO_CONNECT));
             return;
         }
 
-        setEncryptType(lock.getAddress(), lock.getEncryptVersion(), lock.getEntryptKey());
         final GetProductInfo getProductInfo = new GetProductInfo();
         getProductInfo.setClientHelper(clientHelper);
         getProductInfo.sendMsg(new BleCallBack<ProductInfo>() {
@@ -365,7 +414,9 @@ public class Unilink extends UTBleLink {
 
             @Override
             public void fail(int errCode, String errMsg) {
-                handleErrCode(lock, errCode, errMsg, getProductInfo, callBack);
+                if (callBack != null) {
+                    callBack.onFailed(errCode, errMsg);
+                }
             }
 
             @Override
@@ -384,19 +435,20 @@ public class Unilink extends UTBleLink {
      */
     public void writeSerialNum(final CloudLock lock, final CallBack callBack) {
         if (lock == null) {
-            return;
+            throw new NullPointerException("CloudLock对象不能为null");
         }
 
         ClientHelper clientHelper = mConnectionManager.getBleHelper(lock.getAddress());
         if (clientHelper == null) {
+            callBack.onFailed(ErrCode.ERR_NO_CONNECT, ErrCode.getMessage(ErrCode.ERR_NO_CONNECT));
             return;
         }
 
         WriteProductionSerialNum writeProductionSerialNum = new WriteProductionSerialNum(lock.getSerialNum());
         writeProductionSerialNum.setClientHelper(clientHelper);
-        writeProductionSerialNum.sendMsg(new BleCallBack<WriteProductionSerialNum.Data>() {
+        writeProductionSerialNum.sendMsg(new BleCallBack<Void>() {
             @Override
-            public void success(WriteProductionSerialNum.Data result) {
+            public void success(Void result) {
                 if (callBack != null) {
                     callBack.onSuccess(lock);
                 }
@@ -425,11 +477,12 @@ public class Unilink extends UTBleLink {
      */
     public void readSerialNum(final CloudLock lock, final CallBack callBack) {
         if (lock == null) {
-            return;
+            throw new NullPointerException("CloudLock对象不能为null");
         }
 
         ClientHelper clientHelper = mConnectionManager.getBleHelper(lock.getAddress());
         if (clientHelper == null) {
+            callBack.onFailed(ErrCode.ERR_NO_CONNECT, ErrCode.getMessage(ErrCode.ERR_NO_CONNECT));
             return;
         }
 
@@ -466,28 +519,23 @@ public class Unilink extends UTBleLink {
      * @param callBack
      */
     public void writeVendorId(final CloudLock lock, final CallBack callBack) {
-        if (lock == null) {
-            return;
+        if (lock == null ) {
+            throw new NullPointerException("CloudLock对象不能为null");
         }
 
         ClientHelper clientHelper = mConnectionManager.getBleHelper(lock.getAddress());
         if (clientHelper == null) {
+            callBack.onFailed(ErrCode.ERR_NO_CONNECT, ErrCode.getMessage(ErrCode.ERR_NO_CONNECT));
             return;
         }
 
         WriteVendorId writeVendorId = new WriteVendorId(lock.getVendorId(), lock.getDeviceType());
         writeVendorId.setClientHelper(clientHelper);
-        writeVendorId.sendMsg(new BleCallBack<WriteVendorId.Data>() {
+        writeVendorId.sendMsg(new BleCallBack<Void>() {
             @Override
-            public void success(WriteVendorId.Data result) {
+            public void success(Void result) {
                 if (callBack != null) {
-                    if (result.isSuccess()) {
-                        callBack.onSuccess(lock);
-                    } else {
-                        int errCode = ErrCode.ERR_WRITE_VENDOR_ID;
-                        callBack.onFailed(errCode, ErrCode.getMessage(errCode));
-                    }
-
+                    callBack.onSuccess(lock);
                 }
             }
 
@@ -514,11 +562,12 @@ public class Unilink extends UTBleLink {
      */
     public void readVendorId(final CloudLock lock, final CallBack callBack) {
         if (lock == null) {
-            return;
+            throw new NullPointerException("CloudLock对象不能为null");
         }
 
         ClientHelper clientHelper = mConnectionManager.getBleHelper(lock.getAddress());
         if (clientHelper == null) {
+            callBack.onFailed(ErrCode.ERR_NO_CONNECT, ErrCode.getMessage(ErrCode.ERR_NO_CONNECT));
             return;
         }
 
@@ -553,18 +602,19 @@ public class Unilink extends UTBleLink {
     /**
      * 读取自增变量
      *
-     * @param lock     表示某个云锁设备， 初始化云锁成功后{@link #initLock(UTBleDevice, CallBack)}会返回相应CloudLock对象
+     * @param lock     表示某个云锁设备， 初始化云锁成功后{@link #initLock(ScanDevice, CallBack)}会返回相应CloudLock对象
      * @param callback 操作回调接口
      */
     public void readAutoIncreaseNum(final CloudLock lock, final CallBack callback) {
 
         if (lock == null) {
-            return;
+            throw new NullPointerException("CloudLock对象不能为null");
         }
 
         ClientHelper clientHelper = mConnectionManager.getBleHelper(lock.getAddress());
-        setEncryptType(lock.getAddress(), lock.getEncryptVersion(), lock.getEntryptKey());
+        setEncryptType(lock.getAddress(), lock.getEncryptType(), lock.getEntryptKey());
         if (clientHelper == null) {
+            callback.onFailed(ErrCode.ERR_NO_CONNECT, ErrCode.getMessage(ErrCode.ERR_NO_CONNECT));
             return;
         }
 
@@ -603,7 +653,7 @@ public class Unilink extends UTBleLink {
      * @param cmd       应答异常的命令
      * @param callBack  命令回调
      */
-    private void handleErrCode(CloudLock cloudLock, int errCode, String errMessage, final BleCmdBase cmd, final CallBack callBack) {
+    private void handleErrCode(CloudLock cloudLock, int errCode, String errMessage, final BleCmdBase cmd, final CallBack callBack, final BleCallBack bleCallBack) {
         if (errCode == ErrCode.ERR_REPEAT_CODE) {
             Log.i("autuIncreaseNum error，start read autoIncreaseNum");
             readAutoIncreaseNum(cloudLock, new CallBack() {
@@ -612,14 +662,14 @@ public class Unilink extends UTBleLink {
                     int autoIncreaseNum = cloudLock.getAutuIncreaseNum();
                     Log.i("read autoIncreaseNum success:" + autoIncreaseNum);
                     BleCmdBase.setAutoIncreaseNum(autoIncreaseNum);
-                    sendCmd(cloudLock, cmd, callBack);
+                    sendCmd(cloudLock, cmd, callBack, bleCallBack);
                 }
 
                 @Override
-                public void onFailed(int code, String errMsg) {
+                public void onFailed(int errCode, String errMsg) {
                     Log.i("read autoIncreaseNum failed:" + errMsg);
                     if (callBack != null) {
-                        callBack.onFailed(code, errMsg);
+                        callBack.onFailed(errCode, errMsg);
                     }
                 }
             });
@@ -633,29 +683,8 @@ public class Unilink extends UTBleLink {
 
     }
 
-    private void sendCmd(final CloudLock cloudLock, BleCmdBase cmd, final CallBack callBack) {
-        cmd.sendMsg(new BleCallBack() {
-            @Override
-            public void success(Object result) {
-                if (callBack != null) {
-                    callBack.onSuccess(cloudLock);
-                }
-            }
-
-            @Override
-            public void fail(int errCode, String errMsg) {
-                if (callBack != null) {
-                    callBack.onFailed(errCode, errMsg);
-                }
-            }
-
-            @Override
-            public void timeout() {
-                if (callBack != null) {
-                    callBack.onFailed(ErrCode.ERR_TIMEOUT, ErrCode.getMessage(ErrCode.ERR_TIMEOUT));
-                }
-            }
-        });
+    private void sendCmd(final CloudLock cloudLock, BleCmdBase cmd, final CallBack callBack, BleCallBack bleCallBack) {
+        cmd.sendMsg(bleCallBack);
     }
 
     /**
@@ -668,9 +697,4 @@ public class Unilink extends UTBleLink {
         mConnectionManager.addLockStateListener(lockAddress, lockStateListener);
     }
 
-    public interface CallBack {
-        void onSuccess(CloudLock cloudLock);
-
-        void onFailed(int code, String errMsg);
-    }
 }

@@ -4,7 +4,7 @@ import com.ut.unilink.cloudLock.protocol.BleMsg;
 
 import java.nio.ByteBuffer;
 
-public class ResetLock extends BleCmdBase<ResetLock.Data>{
+public class ResetLock extends BleCmdBase<Void>{
 
     private static final byte CODE = 0x21;
     private byte[] adminPassword;
@@ -30,20 +30,8 @@ public class ResetLock extends BleCmdBase<ResetLock.Data>{
     }
 
     @Override
-    Data parse(BleMsg msg) {
-        ByteBuffer buffer = ByteBuffer.wrap(msg.getContent());
-        Data data = new Data();
-        data.result = buffer.get();
-        data.errCode = buffer.get();
-        return data;
+    Void parse(BleMsg msg) {
+        return null;
     }
 
-    public static class Data {
-        public byte result;
-        public byte errCode;
-
-        public boolean isSuccess() {
-            return result == 1 ? true : false;
-        }
-    }
 }

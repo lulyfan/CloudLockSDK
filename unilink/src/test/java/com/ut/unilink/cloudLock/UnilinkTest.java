@@ -21,9 +21,9 @@ public class UnilinkTest {
         byte[] openLockPassword = new byte[]{1, 2, 3, 4, 5, 6};
         WriteDeviceInfo openLock = new WriteDeviceInfo(openLockPassword, (byte) 1, new byte[]{1});
         openLock.setClientHelper(clientHelper);
-        openLock.sendMsg(new BleCallBack<WriteDeviceInfo.Data>() {
+        openLock.sendMsg(new BleCallBack<Void>() {
             @Override
-            public void success(WriteDeviceInfo.Data result) {
+            public void success(Void result) {
             }
 
             @Override

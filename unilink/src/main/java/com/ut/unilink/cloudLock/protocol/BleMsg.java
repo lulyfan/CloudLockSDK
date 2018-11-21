@@ -4,13 +4,18 @@ import java.nio.ByteBuffer;
 
 public class BleMsg {
 
+    public static final int ENCRYPT_TYPE_NO = -1;           //不加密
+    public static final int ENCRYPT_TYPE_FIXED = 1;         //固定加密方式
+    public static final int ENCRYPT_TYPE_DYNAMIC = 0;       //动态加密方式
+
     private int dataLength;    //数据正文字节长度
     private boolean isResponseError;
     private byte code;           //功能码
     private byte[] content;
-    private IEncrypt mEntrypt = NO_ENCRYPT;
+    private IEncrypt mEntrypt;
     private int requestID;
-    private boolean isEncrypt = true;   //标识消息是否加密, 默认加密
+
+    private int encryptType = ENCRYPT_TYPE_DYNAMIC;          //默认使用动态加密
 
     public static IEncrypt NO_ENCRYPT = new IEncrypt() {
         @Override
@@ -35,7 +40,7 @@ public class BleMsg {
             buffer.put(content);
         }
 
-        if (mEntrypt == null || !isEncrypt) {
+        if (mEntrypt == null) {
             mEntrypt = NO_ENCRYPT;
         }
         byte[] encryptMsg = mEntrypt.encrypt(buffer.array());
@@ -46,8 +51,10 @@ public class BleMsg {
     public static BleMsg decode(byte[] data, IEncrypt encrypt) {
 
         BleMsg msg = new BleMsg();
-        if (encrypt != null) {
-            msg.mEntrypt = encrypt;
+        msg.mEntrypt = encrypt;
+
+        if (msg.mEntrypt == null) {
+            msg.mEntrypt = NO_ENCRYPT;
         }
 
         ByteBuffer byteBuf = ByteBuffer.wrap(msg.getEntrypt().decrypt(data));
@@ -62,14 +69,6 @@ public class BleMsg {
         msg.content = content;
 
         return msg;
-    }
-
-    public void setEncrypt(boolean encrypt) {
-        isEncrypt = encrypt;
-    }
-
-    public boolean isEncrypt() {
-        return isEncrypt;
     }
 
     public void setRequestID(int requestID) {
@@ -110,5 +109,17 @@ public class BleMsg {
 
     public void setEntrypt(IEncrypt mEntrypt) {
         this.mEntrypt = mEntrypt;
+    }
+
+    public int getEncryptType() {
+        return encryptType;
+    }
+
+    public void setEncryptType(int encryptType) {
+        this.encryptType = encryptType;
+    }
+
+    public boolean isEncrypt() {
+        return encryptType == ENCRYPT_TYPE_NO ? false : true;
     }
 }

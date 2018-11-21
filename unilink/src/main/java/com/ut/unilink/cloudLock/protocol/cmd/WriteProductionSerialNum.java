@@ -2,7 +2,7 @@ package com.ut.unilink.cloudLock.protocol.cmd;
 
 import com.ut.unilink.cloudLock.protocol.BleMsg;
 
-public class WriteProductionSerialNum extends BleCmdBase<WriteProductionSerialNum.Data>{
+public class WriteProductionSerialNum extends BleCmdBase<Void>{
 
     private static final byte CODE = 0x27;
     private byte[] prodectionSerialNum;
@@ -20,19 +20,12 @@ public class WriteProductionSerialNum extends BleCmdBase<WriteProductionSerialNu
         BleMsg msg = new BleMsg();
         msg.setCode(CODE);
         msg.setContent(prodectionSerialNum);
-        msg.setEncrypt(false);
+        msg.setEncryptType(BleMsg.ENCRYPT_TYPE_FIXED);
         return msg;
     }
 
     @Override
-    Data parse(BleMsg msg) {
-        byte[] content = msg.getContent();
-        Data data = new Data();
-        data.result = content[0];
-        return data;
-    }
-
-    public static class Data {
-        public byte result;
+    Void parse(BleMsg msg) {
+        return null;
     }
 }

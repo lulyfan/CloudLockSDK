@@ -5,7 +5,7 @@ import com.ut.unilink.util.Log;
 
 import java.nio.ByteBuffer;
 
-public class WriteDeviceInfo extends BleCmdBase<WriteDeviceInfo.Data>{
+public class WriteDeviceInfo extends BleCmdBase<Void>{
 
     private static final byte CODE = 0x22;
     private byte[] openLockPassword;
@@ -34,7 +34,6 @@ public class WriteDeviceInfo extends BleCmdBase<WriteDeviceInfo.Data>{
         ByteBuffer buffer = ByteBuffer.allocate(openLockPassword.length + 2 + 2);
         buffer.put(openLockPassword);
         buffer.putShort((short) autoIncreaseNum);
-        Log.i("openLock autoIncreaseNum:" + autoIncreaseNum);
         buffer.put(deviceNum);
         buffer.put(value);
         msg.setContent(buffer.array());
@@ -42,18 +41,7 @@ public class WriteDeviceInfo extends BleCmdBase<WriteDeviceInfo.Data>{
     }
 
     @Override
-    Data parse(BleMsg msg) {
-        ByteBuffer buffer = ByteBuffer.wrap(msg.getContent());
-        Data data = new Data();
-        data.result = buffer.get();
-        return data;
-    }
-
-    public static class Data {
-        byte result;
-
-        public boolean isSuccess() {
-            return result == 1 ? true : false;
-        }
+    Void parse(BleMsg msg) {
+        return null;
     }
 }

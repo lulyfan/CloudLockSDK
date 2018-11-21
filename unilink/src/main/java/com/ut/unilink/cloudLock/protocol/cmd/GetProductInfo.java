@@ -12,6 +12,7 @@ public class GetProductInfo extends BleCmdBase<ProductInfo>{
     @Override
     public BleMsg build() {
         BleMsg msg = new BleMsg();
+        msg.setEncryptType(BleMsg.ENCRYPT_TYPE_FIXED);
         msg.setCode(CODE);
         return msg;
     }
@@ -20,9 +21,9 @@ public class GetProductInfo extends BleCmdBase<ProductInfo>{
     ProductInfo parse(BleMsg msg) {
         ByteBuffer buffer = ByteBuffer.wrap(msg.getContent());
         ProductInfo data = new ProductInfo();
-        buffer.get(data.version);
-        buffer.get(data.serialNum);
-        buffer.get(data.vendorId);
+        buffer.get(data.getVersion());
+        buffer.get(data.getSerialNum());
+        buffer.get(data.getVendorId());
         return data;
     }
 
