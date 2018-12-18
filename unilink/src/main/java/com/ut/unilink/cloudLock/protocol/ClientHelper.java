@@ -14,7 +14,7 @@ public class ClientHelper implements ClientBase.ReceiveListener {
 	private IEncrypt mEncrypt;
 	private static AtomicInteger value = new AtomicInteger();
 
-	private static final int TIMEOUT = 500;
+	private static final int TIMEOUT = 1000;
 
 	public ClientHelper(ClientBase client) {
 		this.client = client;

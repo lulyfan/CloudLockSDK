@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
         deviceAdapter.notifyDataSetChanged();
         int result = unilinkManager.scan(new ScanListener() {
             @Override
-            public void onScan(List<ScanDevice> scanDevices) {
+            public void onScan(ScanDevice scanDevice, List<ScanDevice> scanDevices) {
                 deviceAdapter.setScanDevices(scanDevices);
                 deviceAdapter.notifyDataSetChanged();
 

@@ -1,5 +1,7 @@
 package com.ut.unilink.cloudLock;
 
+import com.ut.unilink.util.Log;
+
 import org.junit.Test;
 
 import java.util.List;
@@ -59,15 +61,26 @@ public class FrameHandlerTest {
     public void handleReceive() {
         FrameHandler frameHandler = new FrameHandler();
 
-        byte[] d4 = new byte[]{(byte) 0xa5, 0x5a, 0x08, (byte) 0x80, 0x07, (byte) 0xb3, (byte) 0x97, 0x35, (byte) 0x91, (byte) 0xa9, (byte) 0x96, 0x6a, (byte) 0xa3, 0x53, 0x59};
-        System.out.println(toUnsignedHexString(frameHandler.handleReceive(d4)));
+        byte[] d1 = getBytes("a55a08c001290eb9a27fcceb3b9cbe");
+//        byte[] d2 = getBytes("a55a20c1017d1e8dc0cac3139e579806e10dc8d5");
+//        byte[] d4 = getBytes("a55a20c2014d69a5848576450c");
 
-//        byte[] d1 = new byte[]{(byte) 0xa5, 0x5a, 0x0e, 0x00, 0x1e, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x26, 0x64};
-//        byte[] d2 = new byte[]{(byte) 0xa5, 0x5a, 0x0e, 0x01, 0x1e, 0x0e, 0x54, (byte) 0xd8};
-//
-//        System.out.println(toUnsignedHexString(frameHandler.handleReceive(d1)));
+        System.out.println(toUnsignedHexString(frameHandler.handleReceive(d1)));
 //        System.out.println(toUnsignedHexString(frameHandler.handleReceive(d2)));
+//        System.out.println(toUnsignedHexString(frameHandler.handleReceive(d4)));
 
+    }
 
+    private byte[] getBytes(String data) {
+        int length = data.length() / 2;
+        byte[] result = new byte[length];
+
+        for (int i=0, j=0; i<length; i++, j+=2) {
+            String item = data.substring(j, j+2);
+            result[i] = (byte) Integer.parseInt(item, 16);
+        }
+
+        System.out.println(Log.toUnsignedHex(result, ""));
+        return result;
     }
 }

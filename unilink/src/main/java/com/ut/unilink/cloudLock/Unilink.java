@@ -244,6 +244,92 @@ public class Unilink extends UTBleLink {
     }
 
     /**
+     * 控制指定云锁设备的电机进行正转操作
+     *
+     * @param lock     表示某个云锁设备， 初始化云锁成功后{@link #initLock(ScanDevice, CallBack)}会返回相应CloudLock对象
+     * @param callBack 操作回调接口
+     */
+    public void setMotorForward(final CloudLock lock, final CallBack callBack) {
+
+        if (lock == null) {
+            throw new NullPointerException("CloudLock对象不能为null");
+        }
+
+        ClientHelper clientHelper = mConnectionManager.getBleHelper(lock.getAddress());
+        if (clientHelper == null) {
+            callBack.onFailed(ErrCode.ERR_NO_CONNECT, ErrCode.getMessage(ErrCode.ERR_NO_CONNECT));
+            return;
+        }
+
+        setEncryptType(lock.getAddress(), lock.getEncryptType(), lock.getEntryptKey());
+        final WriteDeviceInfo writeDeviceInfo = new WriteDeviceInfo(lock.getOpenLockPassword(), (byte) 1, new byte[]{1});
+        writeDeviceInfo.setClientHelper(clientHelper);
+        writeDeviceInfo.sendMsg(new BleCallBack<Void>() {
+            @Override
+            public void success(Void result) {
+                if (callBack != null) {
+                    callBack.onSuccess(lock);
+                }
+            }
+
+            @Override
+            public void fail(int errCode, String errMsg) {
+                handleErrCode(lock, errCode, errMsg, writeDeviceInfo, callBack, this);
+            }
+
+            @Override
+            public void timeout() {
+                if (callBack != null) {
+                    callBack.onFailed(ERR_TIMEOUT, ErrCode.getMessage(ERR_TIMEOUT));
+                }
+            }
+        });
+    }
+
+    /**
+     * 控制指定云锁设备的电机进行反转操作
+     *
+     * @param lock     表示某个云锁设备， 初始化云锁成功后{@link #initLock(ScanDevice, CallBack)}会返回相应CloudLock对象
+     * @param callBack 操作回调接口
+     */
+    public void setMotorReverse(final CloudLock lock, final CallBack callBack) {
+
+        if (lock == null) {
+            throw new NullPointerException("CloudLock对象不能为null");
+        }
+
+        ClientHelper clientHelper = mConnectionManager.getBleHelper(lock.getAddress());
+        if (clientHelper == null) {
+            callBack.onFailed(ErrCode.ERR_NO_CONNECT, ErrCode.getMessage(ErrCode.ERR_NO_CONNECT));
+            return;
+        }
+
+        setEncryptType(lock.getAddress(), lock.getEncryptType(), lock.getEntryptKey());
+        final WriteDeviceInfo writeDeviceInfo = new WriteDeviceInfo(lock.getOpenLockPassword(), (byte) 1, new byte[]{0});
+        writeDeviceInfo.setClientHelper(clientHelper);
+        writeDeviceInfo.sendMsg(new BleCallBack<Void>() {
+            @Override
+            public void success(Void result) {
+                if (callBack != null) {
+                    callBack.onSuccess(lock);
+                }
+            }
+
+            @Override
+            public void fail(int errCode, String errMsg) {
+                handleErrCode(lock, errCode, errMsg, writeDeviceInfo, callBack, this);
+            }
+
+            @Override
+            public void timeout() {
+                if (callBack != null) {
+                    callBack.onFailed(ERR_TIMEOUT, ErrCode.getMessage(ERR_TIMEOUT));
+                }
+            }
+        });
+    }
+
+    /**
      * 重置指定云锁设备
      *
      * @param lock     表示某个云锁设备， 初始化云锁成功后{@link #initLock(ScanDevice, CallBack)}会返回相应CloudLock对象

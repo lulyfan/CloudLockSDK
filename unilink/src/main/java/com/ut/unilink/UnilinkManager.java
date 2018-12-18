@@ -220,6 +220,44 @@ public class UnilinkManager {
     }
 
     /**
+     * <p控制指定云锁设备电机进行正转操作。
+     * <p>调用命令前需要先激活云锁设备{@link #initLock(ScanDevice, CallBack)、 {@link #confirmInit(CloudLock, CallBack)}}。
+     * <p><pre>参数lock对象有两种获取方式
+     * 1.通过调用初始化命令成功后获取{@link #initLock(ScanDevice, CallBack)}
+     * 2.手动创建,需要设置相应参数
+     *
+     *     CloudLock cloudLock = new CloudLock(mac);
+     *     cloudLock.setOpenLockPassword(adminPW);
+     *     cloudLock.setEncryptType(encryptType);
+     *     cloudLock.setEntryptKey(key);
+     * </pre>
+     * @param lock 表示某个云锁设备
+     * @param callBack 操作回调接口
+     */
+    public void setMotorForward(CloudLock lock, CallBack callBack) {
+        mUnilink.setMotorForward(lock, callBack);
+    }
+
+    /**
+     * <p控制指定云锁设备电机进行反转操作。
+     * <p>调用命令前需要先激活云锁设备{@link #initLock(ScanDevice, CallBack)、 {@link #confirmInit(CloudLock, CallBack)}}。
+     * <p><pre>参数lock对象有两种获取方式
+     * 1.通过调用初始化命令成功后获取{@link #initLock(ScanDevice, CallBack)}
+     * 2.手动创建,需要设置相应参数
+     *
+     *     CloudLock cloudLock = new CloudLock(mac);
+     *     cloudLock.setOpenLockPassword(adminPW);
+     *     cloudLock.setEncryptType(encryptType);
+     *     cloudLock.setEntryptKey(key);
+     * </pre>
+     * @param lock 表示某个云锁设备
+     * @param callBack 操作回调接口
+     */
+    public void setMotorReverse(CloudLock lock, CallBack callBack) {
+        mUnilink.setMotorReverse(lock, callBack);
+    }
+
+    /**
      * <p>重置指定云锁设备。
      * <p>调用命令前需要先激活云锁设备{@link #initLock(ScanDevice, CallBack)、 {@link #confirmInit(CloudLock, CallBack)}}。
      * <p><pre>参数lock对象有两种获取方式

@@ -38,6 +38,13 @@ public class CloudLock {
         return bleDevice.getAddress();
     }
 
+    public void setAddress(String mac) {
+        if (bleDevice == null) {
+            bleDevice = new ScanDevice();
+        }
+        bleDevice.setAddress(mac);
+    }
+
     public ScanDevice getBleDevice() {
         return bleDevice;
     }

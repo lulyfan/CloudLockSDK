@@ -37,6 +37,8 @@ public class FrameHandler{
         byte[] data = new byte[msg.length - 3];
         System.arraycopy(msg, 0, data, 0, data.length);
 
+//        Log.i("加密前：" + Log.toUnsignedHex(data, " "));
+
         int dataLength = data.length;
 
         int count = dataLength / SIZE_FRAME_CONTENT;   //将数据分成count个帧发送
@@ -77,6 +79,8 @@ public class FrameHandler{
             frameBuffer.clear();
 
             result.add(item);
+
+//            Log.i("加密后：" + Log.toUnsignedHex(item, " "));
         }
 
         return result;

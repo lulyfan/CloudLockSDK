@@ -2,6 +2,8 @@ package com.zhichu.nativeplugin.ble.scan;
 
 import android.bluetooth.BluetoothDevice;
 
+import com.ut.unilink.util.Log;
+
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -40,6 +42,8 @@ public class UTFilterScanCallback extends ScanCallback {
 
     @Override
     public boolean onFilter(BluetoothDevice device, int rssi, byte[] scanRecord) {
+
+        System.out.println(Log.toUnsignedHex(scanRecord, " "));
 
         byte[] cloudLockRecord = getClockLockRecord(scanRecord);
         if (cloudLockRecord == null) {

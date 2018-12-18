@@ -13,6 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
+        android:onClick="onClick"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/lock_disconnect" />
@@ -27,78 +28,6 @@
         app:layout_constraintStart_toEndOf="@+id/lock"
         app:layout_constraintTop_toTopOf="@+id/lock" />
 
-    <Button
-        android:id="@+id/connect"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:onClick="onClick"
-        android:text="connect lock"
-        app:layout_constraintEnd_toStartOf="@+id/writeSerialNum"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lock" />
-
-    <Button
-        android:id="@+id/open"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:onClick="onClick"
-        android:text="open lock"
-        app:layout_constraintEnd_toStartOf="@+id/writeVendorId"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/init" />
-
-    <Button
-        android:id="@+id/reset"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:onClick="onClick"
-        android:text="reset lock"
-        app:layout_constraintEnd_toStartOf="@+id/readVendorId"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/open" />
-
-    <Button
-        android:id="@+id/readCode"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:onClick="onClick"
-        android:text="read autoIncreasenum"
-        app:layout_constraintEnd_toStartOf="@+id/readInfo"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/reset" />
-
-    <Button
-        android:id="@+id/init"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:onClick="onClick"
-        android:text="init lock"
-        app:layout_constraintEnd_toStartOf="@+id/readSerialNum"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/connect" />
-
     <TextView
         android:id="@+id/power"
         android:layout_width="0dp"
@@ -107,59 +36,6 @@
         app:layout_constraintStart_toStartOf="@+id/lockInfo"
         app:layout_constraintTop_toBottomOf="@+id/lockInfo" />
 
-    <Button
-        android:id="@+id/superPW"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:onClick="onClick"
-        android:text="send super password"
-        app:layout_constraintEnd_toStartOf="@+id/readMutilInfo"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/readCode" />
-
-    <Button
-        android:id="@+id/writeSerialNum"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:onClick="onClick"
-        android:text="write serial num"
-        app:layout_constraintBottom_toBottomOf="@+id/connect"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/connect"
-        app:layout_constraintTop_toTopOf="@+id/connect" />
-
-    <Button
-        android:id="@+id/readSerialNum"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:onClick="onClick"
-        android:text="read serial num"
-        app:layout_constraintBottom_toBottomOf="@+id/init"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/init"
-        app:layout_constraintTop_toTopOf="@+id/init" />
-
-    <Button
-        android:id="@+id/writeVendorId"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:onClick="onClick"
-        android:text="write vendorID"
-        app:layout_constraintBottom_toBottomOf="@+id/open"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/open"
-        app:layout_constraintTop_toTopOf="@+id/open" />
-
     <android.support.constraint.Guideline
         android:id="@+id/guideline"
         android:layout_width="wrap_content"
@@ -167,71 +43,238 @@
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.5" />
 
-    <Button
-        android:id="@+id/readVendorId"
+    <ScrollView
+        android:id="@+id/scrollView2"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:onClick="onClick"
-        android:text="read vendorId"
-        app:layout_constraintBottom_toBottomOf="@+id/reset"
+        android:layout_height="0dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/reset"
-        app:layout_constraintTop_toTopOf="@+id/reset" />
-
-    <Button
-        android:id="@+id/readInfo"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:onClick="onClick"
-        android:text="read info"
-        app:layout_constraintBottom_toBottomOf="@+id/readCode"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/readCode"
-        app:layout_constraintTop_toTopOf="@+id/readCode" />
-
-    <Button
-        android:id="@+id/readMutilInfo"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:onClick="onClick"
-        android:text="read mutil info"
-        app:layout_constraintBottom_toBottomOf="@+id/superPW"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/superPW"
-        app:layout_constraintTop_toTopOf="@+id/superPW" />
-
-    <Button
-        android:id="@+id/getProductInfo"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:onClick="onClick"
-        android:text="get product info"
-        app:layout_constraintEnd_toEndOf="@+id/superPW"
-        app:layout_constraintEnd_toStartOf="@+id/confirmInit"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/superPW" />
+        app:layout_constraintTop_toBottomOf="@+id/lock">
 
-    <Button
-        android:id="@+id/confirmInit"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:text="confirm init"
-        android:onClick="onClick"
-        app:layout_constraintBottom_toBottomOf="@+id/getProductInfo"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/getProductInfo"
-        app:layout_constraintTop_toTopOf="@+id/getProductInfo" />
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/readInfo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:onClick="onClick"
+                android:text="读取指定设备节点信息"
+                app:layout_constraintBottom_toBottomOf="@+id/readCode"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/readCode"
+                app:layout_constraintTop_toTopOf="@+id/readCode" />
+
+            <Button
+                android:id="@+id/readCode"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:onClick="onClick"
+                android:text="读取重复攻击校验码"
+                app:layout_constraintEnd_toStartOf="@+id/readInfo"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/reset" />
+
+            <Button
+                android:id="@+id/reset"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:onClick="onClick"
+                android:text="重置锁"
+                app:layout_constraintEnd_toStartOf="@+id/readVendorId"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/open" />
+
+            <Button
+                android:id="@+id/writeSerialNum"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:onClick="onClick"
+                android:text="写入生产序列号"
+                app:layout_constraintBottom_toBottomOf="@+id/connect"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/connect"
+                app:layout_constraintTop_toTopOf="@+id/connect" />
+
+            <Button
+                android:id="@+id/init"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:onClick="onClick"
+                android:text="初始化锁"
+                app:layout_constraintEnd_toStartOf="@+id/readSerialNum"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/connect" />
+
+            <Button
+                android:id="@+id/superPW"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:onClick="onClick"
+                android:text="发送超级密码"
+                app:layout_constraintEnd_toStartOf="@+id/readMutilInfo"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/readCode" />
+
+            <Button
+                android:id="@+id/getProductInfo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:onClick="onClick"
+                android:text="获取产品信息"
+                app:layout_constraintEnd_toEndOf="@+id/superPW"
+                app:layout_constraintEnd_toStartOf="@+id/confirmInit"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/superPW" />
+
+            <Button
+                android:id="@+id/writeVendorId"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:onClick="onClick"
+                android:text="写入产商标识"
+                app:layout_constraintBottom_toBottomOf="@+id/open"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/open"
+                app:layout_constraintTop_toTopOf="@+id/open" />
+
+            <Button
+                android:id="@+id/connect"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:onClick="onClick"
+                android:text="连接设备"
+                app:layout_constraintEnd_toStartOf="@+id/writeSerialNum"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Button
+                android:id="@+id/readVendorId"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:onClick="onClick"
+                android:text="读取产商标识"
+                app:layout_constraintBottom_toBottomOf="@+id/reset"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/reset"
+                app:layout_constraintTop_toTopOf="@+id/reset" />
+
+            <Button
+                android:id="@+id/open"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:onClick="onClick"
+                android:text="开锁"
+                app:layout_constraintEnd_toStartOf="@+id/writeVendorId"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/init" />
+
+            <Button
+                android:id="@+id/readMutilInfo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:onClick="onClick"
+                android:text="读取多个设备节点信息"
+                app:layout_constraintBottom_toBottomOf="@+id/superPW"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/superPW"
+                app:layout_constraintTop_toTopOf="@+id/superPW" />
+
+            <Button
+                android:id="@+id/readSerialNum"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:onClick="onClick"
+                android:text="读取生产序列号"
+                app:layout_constraintBottom_toBottomOf="@+id/init"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/init"
+                app:layout_constraintTop_toTopOf="@+id/init" />
+
+            <Button
+                android:id="@+id/confirmInit"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:onClick="onClick"
+                android:text="确认初始化锁"
+                app:layout_constraintBottom_toBottomOf="@+id/getProductInfo"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/getProductInfo"
+                app:layout_constraintTop_toTopOf="@+id/getProductInfo" />
+
+            <Button
+                android:id="@+id/clockwise"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="@id/getProductInfo"
+                app:layout_constraintEnd_toEndOf="@id/getProductInfo"
+                android:text="电机正转"
+                android:onClick="onClick"
+                app:layout_constraintTop_toBottomOf="@id/getProductInfo"
+                android:layout_marginTop="16dp"/>
+
+            <Button
+                android:id="@+id/anti-cloockwise"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="@id/confirmInit"
+                app:layout_constraintEnd_toEndOf="@id/confirmInit"
+                android:text="电机反转"
+                android:onClick="onClick"
+                app:layout_constraintTop_toBottomOf="@id/confirmInit"
+                android:layout_marginTop="16dp"/>
+
+        </android.support.constraint.ConstraintLayout>
+    </ScrollView>
 
 </android.support.constraint.ConstraintLayout>

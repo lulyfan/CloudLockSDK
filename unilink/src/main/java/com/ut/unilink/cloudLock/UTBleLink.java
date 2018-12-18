@@ -81,14 +81,19 @@ public class UTBleLink {
             @Override
             public void onDeviceFound(BleDevice bleDevice, List<BleDevice> result) {
                 if (scanListener != null) {
+                    ScanDevice currentScanDevice = null; //本次扫描出的设备
                     List<ScanDevice> scanDevices = new ArrayList<>();
                     for (BleDevice device : result) {
                         ScanDevice scanDevice = new ScanDevice();
                         scanDevice.setBleDevice(device);
                         scanDevice.setAddress(device.getDeviceUUID());
                         scanDevices.add(scanDevice);
+
+                        if (bleDevice.getDeviceUUID().equals(scanDevice.getAddress())) {
+                            currentScanDevice = scanDevice;
+                        }
                     }
-                    scanListener.onScan(scanDevices);
+                    scanListener.onScan(currentScanDevice, scanDevices);
                 }
             }
 
