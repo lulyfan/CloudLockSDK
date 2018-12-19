@@ -19,7 +19,6 @@ public class ScanDevice implements Parcelable {
     private BleDevice bleDevice;
 
     public ScanDevice() {
-
     }
 
     protected ScanDevice(Parcel in) {
@@ -44,14 +43,20 @@ public class ScanDevice implements Parcelable {
 
     /**
      * 获取设备mac地址
+     *
      * @return
      */
     public String getAddress() {
         return address;
     }
 
+    public String getName() {
+        return bleDevice.getName();
+    }
+
     /**
      * 设置设备mac地址
+     *
      * @param address
      */
     public void setAddress(String address) {
@@ -60,6 +65,7 @@ public class ScanDevice implements Parcelable {
 
     /**
      * 获取厂商标识
+     *
      * @return
      */
     public byte[] getVendorId() {
@@ -68,6 +74,7 @@ public class ScanDevice implements Parcelable {
 
     /**
      * 设置厂商标识
+     *
      * @param vendorId 4字节数组
      */
     public void setVendorId(byte[] vendorId) {
@@ -79,6 +86,7 @@ public class ScanDevice implements Parcelable {
 
     /**
      * 设备是否激活
+     *
      * @return
      */
     public boolean isActive() {
@@ -87,6 +95,7 @@ public class ScanDevice implements Parcelable {
 
     /**
      * 设置设备激活状态
+     *
      * @param active
      */
     public void setActive(boolean active) {
@@ -95,6 +104,7 @@ public class ScanDevice implements Parcelable {
 
     /**
      * 获取设备类型
+     *
      * @return
      */
     public byte[] getDeviceType() {
@@ -103,6 +113,7 @@ public class ScanDevice implements Parcelable {
 
     /**
      * 设置设备类型
+     *
      * @param deviceType 2字节数组
      */
     public void setDeviceType(byte[] deviceType) {
@@ -118,7 +129,7 @@ public class ScanDevice implements Parcelable {
         byte[] scanRecord = bleDevice.getScanRecord();
         byte[] cloudLockRecord = UTFilterScanCallback.getClockLockRecord(scanRecord);
 
-        System.arraycopy(cloudLockRecord, 5, vendorId, 0,4);
+        System.arraycopy(cloudLockRecord, 5, vendorId, 0, 4);
         isActive = cloudLockRecord[9] == 1 ? true : false;
         System.arraycopy(cloudLockRecord, 10, deviceType, 0, 2);
     }

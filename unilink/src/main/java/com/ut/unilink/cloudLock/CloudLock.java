@@ -51,6 +51,10 @@ public class CloudLock {
         return bleDevice;
     }
 
+    public String getName() {
+        return bleDevice.getName();
+    }
+
     public void setBleDevice(ScanDevice bleDevice) {
         this.bleDevice = bleDevice;
 
