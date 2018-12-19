@@ -1,6 +1,7 @@
 package com.ut.unilink.cloudLock;
 
 import com.ut.unilink.cloudLock.protocol.data.ProductInfo;
+import com.ut.unilink.util.Base64;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,7 +9,7 @@ import java.util.Map;
 /**
  * <p>表示云锁设备。
  * <p>当搜索到未激活的云锁设备时，通过调用{@link com.ut.unilink.UnilinkManager#initLock(ScanDevice, CallBack)}初始化云锁可以得到CloudLock对象，
- *里面保存了云锁设备的相关配置信息，再调用{@link com.ut.unilink.UnilinkManager#confirmInit(CloudLock, CallBack)}确认初始化完成激活
+ * 里面保存了云锁设备的相关配置信息，再调用{@link com.ut.unilink.UnilinkManager#confirmInit(CloudLock, CallBack)}确认初始化完成激活
  */
 public class CloudLock {
 
@@ -29,6 +30,7 @@ public class CloudLock {
 
     /**
      * 获取云锁设备mac地址
+     *
      * @return 6字节mac地址
      */
     public String getAddress() {
@@ -59,6 +61,7 @@ public class CloudLock {
 
     /**
      * 获取云锁激活状态
+     *
      * @return 激活状态
      */
     public boolean isActive() {
@@ -67,6 +70,7 @@ public class CloudLock {
 
     /**
      * 设置云锁激活状态
+     *
      * @param active
      */
     public void setActive(boolean active) {
@@ -75,6 +79,7 @@ public class CloudLock {
 
     /**
      * 获取管理员密码
+     *
      * @return 6字节管理员密码
      */
     public byte[] getAdminPassword() {
@@ -83,6 +88,7 @@ public class CloudLock {
 
     /**
      * 设置管理员密码
+     *
      * @param adminPassword 长度为6的字节数组
      */
     public void setAdminPassword(byte[] adminPassword) {
@@ -95,6 +101,7 @@ public class CloudLock {
 
     /**
      * 设置开锁密码
+     *
      * @param openLockPassword 长度为6的字节数组
      */
     public void setOpenLockPassword(byte[] openLockPassword) {
@@ -107,6 +114,7 @@ public class CloudLock {
 
     /**
      * 设置加密密钥
+     *
      * @param entryptKey 长度为8的字节数组
      */
     public void setEntryptKey(byte[] entryptKey) {
@@ -119,6 +127,7 @@ public class CloudLock {
 
     /**
      * 设置加密方式
+     *
      * @param encryptType 0：TEA加密   1：AES加密
      */
     public void setEncryptType(int encryptType) {
@@ -135,6 +144,7 @@ public class CloudLock {
 
     /**
      * 获取生产序列号
+     *
      * @return 6字节生产序列号
      */
     public byte[] getSerialNum() {
@@ -146,6 +156,7 @@ public class CloudLock {
 
     /**
      * 设置生产序列号
+     *
      * @param serialNum 数组长度为6
      */
     public void setSerialNum(byte[] serialNum) {
@@ -157,6 +168,7 @@ public class CloudLock {
 
     /**
      * 获取产商标识
+     *
      * @return 4字节产商标识
      */
     public byte[] getVendorId() {
@@ -168,6 +180,7 @@ public class CloudLock {
 
     /**
      * 设置厂商标识
+     *
      * @param vendorId 数组长度为4
      */
     public void setVendorId(byte[] vendorId) {
@@ -179,6 +192,7 @@ public class CloudLock {
 
     /**
      * 获取设备类型
+     *
      * @return 2字节设备类型
      */
     public byte[] getDeviceType() {
@@ -190,6 +204,7 @@ public class CloudLock {
 
     /**
      * 设置设备类型
+     *
      * @param deviceType 数组长度为2
      */
     public void setDeviceType(byte[] deviceType) {
@@ -200,6 +215,7 @@ public class CloudLock {
 
     /**
      * 设置当前要读取的设备节点编号
+     *
      * @param deviceNum
      */
     public void setDeviceNum(byte deviceNum) {
@@ -208,6 +224,7 @@ public class CloudLock {
 
     /**
      * 获取当前要读取的设备节点编号
+     *
      * @return 设备节点编号
      */
     public byte getDeviceNum() {
@@ -216,6 +233,7 @@ public class CloudLock {
 
     /**
      * 获取设备的所有节点信息
+     *
      * @return 设备节点信息Map
      */
     public Map getDeviceInfoMap() {
@@ -224,6 +242,7 @@ public class CloudLock {
 
     /**
      * 设置设备的所有节点信息
+     *
      * @param deviceInfoMap
      */
     public void setDeviceInfoMap(Map<Byte, byte[]> deviceInfoMap) {
@@ -232,6 +251,7 @@ public class CloudLock {
 
     /**
      * 获取指定设备节点信息
+     *
      * @param deviceNum
      * @return 设备节点信息
      */
@@ -241,6 +261,7 @@ public class CloudLock {
 
     /**
      * 添加指定设备节点信息
+     *
      * @param deviceNum
      * @param deviceInfo
      */
@@ -250,6 +271,7 @@ public class CloudLock {
 
     /**
      * 获取设备的产品信息
+     *
      * @return 产品信息
      */
     public ProductInfo getProductInfo() {
@@ -258,6 +280,7 @@ public class CloudLock {
 
     /**
      * 设置设备的产品信息
+     *
      * @param productInfo
      */
     public void setProductInfo(ProductInfo productInfo) {
@@ -266,6 +289,7 @@ public class CloudLock {
 
     /**
      * 获取设备的版本
+     *
      * @return
      */
     public byte[] getVersion() {
@@ -273,5 +297,29 @@ public class CloudLock {
             return null;
         }
         return productInfo.getVersion();
+    }
+
+    public String getAdminPasswordString() {
+        return Base64.encode(adminPassword);
+    }
+
+    public void setAdminPassword(String adminPassword) {
+        this.adminPassword = Base64.decode(adminPassword);
+    }
+
+    public String getOpenLockPasswordString() {
+        return Base64.encode(openLockPassword);
+    }
+
+    public void setOpenLockPassword(String openLockPassword) {
+        this.openLockPassword = Base64.decode(openLockPassword);
+    }
+
+    public String getEntryptKeyString() {
+        return Base64.encode(entryptKey);
+    }
+
+    public void setEntryptKey(String entryptKey) {
+        this.entryptKey = Base64.decode(entryptKey);
     }
 }
