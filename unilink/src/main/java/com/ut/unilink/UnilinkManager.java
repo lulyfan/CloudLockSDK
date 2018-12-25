@@ -25,7 +25,7 @@ import com.zhichu.nativeplugin.ble.Ble;
  * <p>云锁设备分为未激活设备和已激活设备，扫描到设备后可以查看激活状态{@link ScanDevice#isActive()}。
  * <p>对设备进行操作前需先激活设备，先要初始化{@link #initLock(ScanDevice, CallBack)}，并在5秒内确认初始化{@link #confirmInit(CloudLock, CallBack)}。
  * <p><pre>
- *获取该类实例：
+ * 获取该类实例：
  *          UnilinkManager unilinkManager = UnilinkManager.getInstance(context);
  * </pre>
  */
@@ -66,6 +66,7 @@ public class UnilinkManager {
 
     /**
      * 请求打开蓝牙。打开蓝牙结果需要实现{@link Activity#onActivityResult(int, int, Intent)}
+     *
      * @param activity
      * @param requestCode 请求码
      */
@@ -75,6 +76,7 @@ public class UnilinkManager {
 
     /**
      * 请求蓝牙搜索所需的定位权限。请求权限结果需要实现{@link Activity#onRequestPermissionsResult(int, String[], int[])}
+     *
      * @param activity
      * @param requestCode
      */
@@ -98,6 +100,7 @@ public class UnilinkManager {
 
     /**
      * 查询指定设备是否已连接
+     *
      * @param address 设备Mac地址
      * @return true:已连接 false:未连接
      */
@@ -107,23 +110,34 @@ public class UnilinkManager {
 
     /**
      * 搜索云锁设备
+     *
      * @param scanListener 搜索结果监听器
-     * @param scanTime 搜索时间,以秒为单位
+     * @param scanTime     搜索时间,以秒为单位
      * @return {@link #BLE_NOT_SUPPORT 蓝牙不支持}、{@link #NO_LOCATION_PERMISSION 没有获取位权限ACCESS_COARSE_LOCATION 或 ACCESS_FINE_LOCATION}
-     *         {@link #BLE_NOT_OPEN 蓝牙没有打开}、{@link #SCAN_SUCCESS 搜索执行成功}
+     * {@link #BLE_NOT_OPEN 蓝牙没有打开}、{@link #SCAN_SUCCESS 搜索执行成功}
      */
     public int scan(final ScanListener scanListener, int scanTime) {
         return scan(scanListener, scanTime, null, null);
     }
 
     /**
+     * 停止搜索
+     *
+     * @return -1 蓝牙不支持  10 蓝牙没有打开  0 停止搜索执行成功
+     */
+    public int stopScan() {
+        return Ble.get().stopScan();
+    }
+
+    /**
      * 搜索指定厂商和设备类型的云锁设备
+     *
      * @param scanListener 搜索结果监听器
-     * @param scanTime 搜索时间,以秒为单位
-     * @param vendorId 要搜索的厂商标识，为4个字节数组，可为null
-     * @param deviceType 要搜索的设备类型，为2个字节数组，可为null
+     * @param scanTime     搜索时间,以秒为单位
+     * @param vendorId     要搜索的厂商标识，为4个字节数组，可为null
+     * @param deviceType   要搜索的设备类型，为2个字节数组，可为null
      * @return {@link #BLE_NOT_SUPPORT 蓝牙不支持}、{@link #NO_LOCATION_PERMISSION 没有获取位权限ACCESS_COARSE_LOCATION 或 ACCESS_FINE_LOCATION}
-     *         {@link #BLE_NOT_OPEN 蓝牙没有打开}、{@link #SCAN_SUCCESS 搜索执行成功}
+     * {@link #BLE_NOT_OPEN 蓝牙没有打开}、{@link #SCAN_SUCCESS 搜索执行成功}
      */
     public int scan(final ScanListener scanListener, int scanTime, byte[] vendorId, byte[] deviceType) {
         if (!checkPermission()) {
@@ -135,7 +149,8 @@ public class UnilinkManager {
 
     /**
      * 连接指定云锁设备
-     * @param mac 云锁设备MAC地址，可以从搜索获取的云锁设备{@link ScanDevice#getAddress()}得到
+     *
+     * @param mac             云锁设备MAC地址，可以从搜索获取的云锁设备{@link ScanDevice#getAddress()}得到
      * @param connectListener 连接结果监听器
      */
     public void connect(String mac, final ConnectListener connectListener) {
@@ -143,9 +158,10 @@ public class UnilinkManager {
     }
 
     /**
-     *连接指定蓝牙设备
-     * @param mac 设备MAC地址
-     * @param connectListener 监听连接结果
+     * 连接指定蓝牙设备
+     *
+     * @param mac               设备MAC地址
+     * @param connectListener   监听连接结果
      * @param lockStateListener 连接成功后，监听云锁的状态信息
      */
     public void connect(String mac, ConnectListener connectListener, LockStateListener lockStateListener) {
@@ -154,8 +170,9 @@ public class UnilinkManager {
 
     /**
      * 连接指定蓝牙设备
-     * @param scanDevice 蓝牙低功耗设备 通过扫描得到{@link #scan(ScanListener, int, byte[], byte[])、 {@link #scan(ScanListener, int)}}
-     * @param connectListener 监听连接结果
+     *
+     * @param scanDevice        蓝牙低功耗设备 通过扫描得到{@link #scan(ScanListener, int, byte[], byte[])、 {@link #scan(ScanListener, int)}}
+     * @param connectListener   监听连接结果
      * @param lockStateListener 连接成功后，监听云锁的状态信息
      */
     public void connect(ScanDevice scanDevice, ConnectListener connectListener, LockStateListener lockStateListener) {
@@ -164,7 +181,8 @@ public class UnilinkManager {
 
     /**
      * 连接指定蓝牙设备
-     * @param scanDevice 蓝牙低功耗设备 通过扫描得到{@link #scan(ScanListener, int, byte[], byte[])、 {@link #scan(ScanListener, int)}}
+     *
+     * @param scanDevice      蓝牙低功耗设备 通过扫描得到{@link #scan(ScanListener, int, byte[], byte[])、 {@link #scan(ScanListener, int)}}
      * @param connectListener 监听连接结果
      */
     public void connect(ScanDevice scanDevice, ConnectListener connectListener) {
@@ -176,8 +194,9 @@ public class UnilinkManager {
      * <p>初始化云锁设备,用于激活云锁设备。
      * <p>调用成功后需要在5秒内调用{@link #confirmInit(CloudLock, CallBack)}进行确认初始化，确认初始化成功后，
      * 云锁设备才成功激活
+     *
      * @param scanDevice 蓝牙低功耗设备, 通过扫描得到{@link #scan(ScanListener, int, byte[], byte[])、 {@link #scan(ScanListener, int)}}
-     * @param callBack 操作回调接口，初始化成功会返回CloudLock对象
+     * @param callBack   操作回调接口，初始化成功会返回CloudLock对象
      */
     public void initLock(ScanDevice scanDevice, CallBack callBack) {
         mUnilink.initLock(scanDevice, callBack);
@@ -193,7 +212,8 @@ public class UnilinkManager {
      *     CloudLock cloudLock = new CloudLock(mac);
      *     cloudLock.setAdminPassword(adminPW);
      * </pre>
-     * @param lock 表示某个云锁设备
+     *
+     * @param lock     表示某个云锁设备
      * @param callBack 操作回调接口
      */
     public void confirmInit(CloudLock lock, CallBack callBack) {
@@ -212,7 +232,8 @@ public class UnilinkManager {
      *     cloudLock.setEncryptType(encryptType);
      *     cloudLock.setEntryptKey(key);
      * </pre>
-     * @param lock 表示某个云锁设备
+     *
+     * @param lock     表示某个云锁设备
      * @param callBack 操作回调接口
      */
     public void openLock(CloudLock lock, CallBack callBack) {
@@ -231,7 +252,8 @@ public class UnilinkManager {
      *     cloudLock.setEncryptType(encryptType);
      *     cloudLock.setEntryptKey(key);
      * </pre>
-     * @param lock 表示某个云锁设备
+     *
+     * @param lock     表示某个云锁设备
      * @param callBack 操作回调接口
      */
     public void setMotorForward(CloudLock lock, CallBack callBack) {
@@ -250,7 +272,8 @@ public class UnilinkManager {
      *     cloudLock.setEncryptType(encryptType);
      *     cloudLock.setEntryptKey(key);
      * </pre>
-     * @param lock 表示某个云锁设备
+     *
+     * @param lock     表示某个云锁设备
      * @param callBack 操作回调接口
      */
     public void setMotorReverse(CloudLock lock, CallBack callBack) {
@@ -269,7 +292,8 @@ public class UnilinkManager {
      *     cloudLock.setEncryptType(encryptType);
      *     cloudLock.setEntryptKey(key);
      * </pre>
-     * @param lock 表示某个云锁设备， 初始化云锁成功后{@link #initLock(ScanDevice, CallBack)}会返回相应CloudLock对象
+     *
+     * @param lock     表示某个云锁设备， 初始化云锁成功后{@link #initLock(ScanDevice, CallBack)}会返回相应CloudLock对象
      * @param callBack 操作回调接口
      */
     public void resetLock(CloudLock lock, CallBack callBack) {
@@ -286,7 +310,8 @@ public class UnilinkManager {
      *
      *     CloudLock cloudLock = new CloudLock(mac);
      * </pre>
-     * @param lock 表示某个云锁设备
+     *
+     * @param lock     表示某个云锁设备
      * @param callBack 操作回调接口
      */
     public void getAutoIncreaseNum(CloudLock lock, CallBack callBack) {
@@ -295,6 +320,7 @@ public class UnilinkManager {
 
     /**
      * 发送超级密码重置设备， 测试用
+     *
      * @param address 设备Mac地址
      */
     public void sendSuperPassword(String address) {
@@ -315,7 +341,8 @@ public class UnilinkManager {
      *     cloudLock.setEntryptKey(key);
      *     cloudLock.setDeviceNum(deviceNum);
      * </pre>
-     * @param lock 表示某个云锁设备
+     *
+     * @param lock     表示某个云锁设备
      * @param callBack 操作回调接口
      */
     public void getDeviceInfo(final CloudLock lock, final CallBack callBack) {
@@ -334,7 +361,8 @@ public class UnilinkManager {
      *     cloudLock.setEncryptType(encryptType);
      *     cloudLock.setEntryptKey(key);
      * </pre>
-     * @param lock 表示某个云锁设备
+     *
+     * @param lock     表示某个云锁设备
      * @param callBack 操作回调接口
      */
     public void getDeviceInfos(final CloudLock lock, final CallBack callBack) {
@@ -352,7 +380,8 @@ public class UnilinkManager {
      *     CloudLock cloudLock = new CloudLock(mac);
      *     cloudLock.setSerialNum(serialNum);
      * </pre>
-     * @param lock 表示某个云锁设备
+     *
+     * @param lock     表示某个云锁设备
      * @param callBack 操作回调接口
      */
     public void setSerialNum(final CloudLock lock, final CallBack callBack) {
@@ -369,7 +398,8 @@ public class UnilinkManager {
      *
      *     CloudLock cloudLock = new CloudLock(mac);
      * </pre>
-     * @param lock 表示某个云锁设备
+     *
+     * @param lock     表示某个云锁设备
      * @param callBack 操作回调接口
      */
     public void getSerialNum(final CloudLock lock, final CallBack callBack) {
@@ -388,7 +418,8 @@ public class UnilinkManager {
      *     cloudLock.setVendorId(vendorId);
      *     cloudLock.setDeviceType(deviceType);
      * </pre>
-     * @param lock 表示某个云锁设备
+     *
+     * @param lock     表示某个云锁设备
      * @param callBack 操作回调接口
      */
     public void setVendorId(final CloudLock lock, final CallBack callBack) {
@@ -405,7 +436,8 @@ public class UnilinkManager {
      *
      *     CloudLock cloudLock = new CloudLock(mac);
      * </pre>
-     * @param lock 表示某个云锁设备
+     *
+     * @param lock     表示某个云锁设备
      * @param callBack 操作回调接口
      */
     public void getVendorId(final CloudLock lock, final CallBack callBack) {
@@ -421,7 +453,8 @@ public class UnilinkManager {
      *
      *     CloudLock cloudLock = new CloudLock(mac);
      * </pre>
-     * @param lock 表示某个云锁设备
+     *
+     * @param lock     表示某个云锁设备
      * @param callBack 操作回调接口
      */
     public void getProductInfo(final CloudLock lock, final CallBack callBack) {
@@ -430,6 +463,7 @@ public class UnilinkManager {
 
     /**
      * 开启或关闭log
+     *
      * @param isEnable
      */
     public void enableLog(boolean isEnable) {
