@@ -782,5 +782,4 @@ public class Unilink extends UTBleLink {
     public void addLockStateListener(String lockAddress, LockStateListener lockStateListener) {
         mConnectionManager.addLockStateListener(lockAddress, lockStateListener);
     }
-
 }
