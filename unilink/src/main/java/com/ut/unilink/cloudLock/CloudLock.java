@@ -274,6 +274,17 @@ public class CloudLock {
     }
 
     /**
+     * 读取设备电量
+     * @return 电量百分比, 返回-1表示还没有从设备中读取电量信息
+     */
+    public int getElect() {
+        if (deviceInfoMap.get(0) == null) {
+            return -1;
+        }
+        return deviceInfoMap.get(0)[0];
+    }
+
+    /**
      * 获取设备的产品信息
      *
      * @return 产品信息

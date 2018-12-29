@@ -350,6 +350,30 @@ public class UnilinkManager {
     }
 
     /**
+     * <p>读取云锁设备电量信息。
+     * 成功读取后的设备电量信息保存到回调的lock对象中，使用{@link CloudLock#getElect()}读取。
+     * <p>调用命令前需要先激活云锁设备{@link #initLock(ScanDevice, CallBack)、 {@link #confirmInit(CloudLock, CallBack)}}。
+     * <p><pre>参数lock对象有两种获取方式
+     * 1.通过调用初始化命令成功后获取{@link #initLock(ScanDevice, CallBack)}
+     * 2.手动创建,需要设置相应参数
+     *
+     *     CloudLock cloudLock = new CloudLock(mac);
+     *     cloudLock.setEncryptType(encryptType);
+     *     cloudLock.setEntryptKey(key);
+     * </pre>
+     * @param lock 表示某个云锁设备
+     * @param callBack 操作回调接口
+     */
+    public void getElect(final CloudLock lock, final CallBack callBack) {
+        if (lock == null) {
+            throw new NullPointerException("CloudLock对象不能为null");
+        }
+
+        lock.setDeviceNum((byte) 0);
+        getDeviceInfo(lock, callBack);
+    }
+
+    /**
      * <p>读取云锁设备多个节点信息。
      * <p>成功读取后的设备节点信息保存到回调的lock对象中，使用{@link CloudLock#getDeviceInfoMap()}读取。
      * <p>调用命令前需要先激活云锁设备{@link #initLock(ScanDevice, CallBack)、 {@link #confirmInit(CloudLock, CallBack)}}。
