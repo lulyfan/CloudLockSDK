@@ -278,10 +278,10 @@ public class CloudLock {
      * @return 电量百分比, 返回-1表示还没有从设备中读取电量信息
      */
     public int getElect() {
-        if (deviceInfoMap.get(0) == null) {
+        if (deviceInfoMap.get((byte)0) == null) {
             return -1;
         }
-        return deviceInfoMap.get(0)[0];
+        return deviceInfoMap.get((byte)0)[0];
     }
 
     /**
