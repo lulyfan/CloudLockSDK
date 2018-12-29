@@ -189,6 +189,9 @@ public class UnilinkManager {
         mUnilink.connect(scanDevice.getAddress(), connectListener);
     }
 
+    public void disconnect(String UUID) {
+        mUnilink.close(UUID);
+    }
 
     /**
      * <p>初始化云锁设备,用于激活云锁设备。
