@@ -23,7 +23,8 @@ public class UTFilterScanCallback extends ScanCallback {
 
     public UTFilterScanCallback(IScanCallback iScanCallback) {
         super(iScanCallback);
-        super.serviceUUID("0001");
+//        super.serviceUUID("0001");
+//        super.serviceUUID("0001","FEE7");
     }
 
     public UTFilterScanCallback resetCallback(IScanCallback iScanCallback) {
@@ -75,6 +76,7 @@ public class UTFilterScanCallback extends ScanCallback {
 
     /**
      * 获取广播包里的云锁数据包
+     *
      * @param scanRecord
      * @return
      */

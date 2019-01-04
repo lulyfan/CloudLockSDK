@@ -164,7 +164,8 @@ public class ScanCallback extends android.bluetooth.le.ScanCallback implements I
 
     private void stopOrTimeoutScan() {
         if (LOLLIPOP()) {
-            this.bluetoothAdapter.getBluetoothLeScanner().stopScan(this);
+            if (this.bluetoothAdapter.getBluetoothLeScanner() != null)
+                this.bluetoothAdapter.getBluetoothLeScanner().stopScan(this);
         } else {
             this.bluetoothAdapter.stopLeScan(leScanCallback);
         }
