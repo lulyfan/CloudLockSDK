@@ -29,6 +29,11 @@ public class BleDevice implements Parcelable {
      */
     private byte[] scanRecord;
 
+    /**
+     * 标识设备的硬件类型
+     */
+    private int deviceId;
+
     public BleDevice(BluetoothDevice bluetoothDevice, int rssi, byte[] scanRecord) {
         this.bluetoothDevice = bluetoothDevice;
         this.rssi = rssi;
@@ -43,6 +48,7 @@ public class BleDevice implements Parcelable {
         bluetoothDevice = in.readParcelable(BluetoothDevice.class.getClassLoader());
         rssi = in.readInt();
         scanRecord = in.createByteArray();
+        deviceId = in.readInt();
     }
 
     /**
@@ -61,6 +67,14 @@ public class BleDevice implements Parcelable {
      */
     public String getDeviceUUID() {
         return bluetoothDevice != null ? bluetoothDevice.getAddress() : null;
+    }
+
+    public int getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(int deviceId) {
+        this.deviceId = deviceId;
     }
 
     public BluetoothDevice getBluetoothDevice() {
@@ -107,6 +121,7 @@ public class BleDevice implements Parcelable {
         dest.writeParcelable(bluetoothDevice, flags);
         dest.writeInt(rssi);
         dest.writeByteArray(scanRecord);
+        dest.writeInt(deviceId);
     }
 
     @Override

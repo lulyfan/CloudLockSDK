@@ -8,4 +8,5 @@ public class LockInfo implements Serializable {
     public byte[] openLockPW;
     public byte[] key;
     public int encrypt;
+    public int deviceId;
 }

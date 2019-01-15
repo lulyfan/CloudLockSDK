@@ -30,7 +30,7 @@ public class ResetLock extends BleCmdBase<Void>{
     }
 
     @Override
-    Void parse(BleMsg msg) {
+    public Void parse(BleMsg msg) {
         return null;
     }
 

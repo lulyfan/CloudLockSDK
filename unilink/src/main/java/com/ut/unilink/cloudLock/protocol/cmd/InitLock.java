@@ -35,7 +35,7 @@ public class InitLock extends BleCmdBase<InitLock.Data>{
     }
 
     @Override
-    Data parse(BleMsg msg) {
+    public Data parse(BleMsg msg) {
         byte[] content = msg.getContent();
         ByteBuffer buffer = ByteBuffer.wrap(content);
         Data data = new Data();
@@ -48,7 +48,8 @@ public class InitLock extends BleCmdBase<InitLock.Data>{
         random.nextBytes(adminPassword);
         random.nextBytes(openLockPassword);
         random.nextBytes(secretKey);
-        encryptVersion = (byte) random.nextInt(1);
+//        encryptVersion = (byte) random.nextInt(1);
+        encryptVersion = 1;
     }
 
     public byte[] getAdminPassword() {

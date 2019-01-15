@@ -15,7 +15,7 @@ public class ReadProductionSerialNum extends BleCmdBase<ReadProductionSerialNum.
     }
 
     @Override
-    Data parse(BleMsg msg) {
+    public Data parse(BleMsg msg) {
         Data data = new Data();
         data.productionSerialNum = msg.getContent();
         return data;

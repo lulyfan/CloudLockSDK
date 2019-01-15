@@ -4,7 +4,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.zhichu.nativeplugin.ble.BleDevice;
-import com.zhichu.nativeplugin.ble.scan.UTFilterScanCallback;
+import com.zhichu.nativeplugin.ble.scan.CloudLockFilter;
+import com.zhichu.nativeplugin.ble.scan.DeviceId;
 
 /**
  * <p>表示通过蓝牙搜索出的设备。
@@ -17,6 +18,8 @@ public class ScanDevice implements Parcelable {
     private boolean isActive;
     private byte[] deviceType = new byte[2];
     private BleDevice bleDevice;
+    private int deviceId;
+    private int version;
 
     public ScanDevice() {
     }
@@ -27,6 +30,8 @@ public class ScanDevice implements Parcelable {
         isActive = in.readByte() != 0;
         deviceType = in.createByteArray();
         bleDevice = in.readParcelable(BleDevice.class.getClassLoader());
+        deviceId = in.readInt();
+        version = in.readInt();
     }
 
     public static final Creator<ScanDevice> CREATOR = new Creator<ScanDevice>() {
@@ -112,6 +117,38 @@ public class ScanDevice implements Parcelable {
     }
 
     /**
+     * 获取设备硬件标识
+     * @return
+     */
+    public int getDeviceId() {
+        return deviceId;
+    }
+
+    /**
+     * 设置设备硬件标识
+     * @param deviceId
+     */
+    public void setDeviceId(int deviceId) {
+        this.deviceId = deviceId;
+    }
+
+    /**
+     * 获取版本号
+     * @return
+     */
+    public int getVersion() {
+        return version;
+    }
+
+    /**
+     * 设置版本号
+     * @param version
+     */
+    public void setVersion(int version) {
+        this.version = version;
+    }
+
+    /**
      * 设置设备类型
      *
      * @param deviceType 2字节数组
@@ -125,13 +162,27 @@ public class ScanDevice implements Parcelable {
 
     void setBleDevice(BleDevice bleDevice) {
         this.bleDevice = bleDevice;
+        deviceId = bleDevice.getDeviceId();
 
-        byte[] scanRecord = bleDevice.getScanRecord();
-        byte[] cloudLockRecord = UTFilterScanCallback.getClockLockRecord(scanRecord);
+        switch (bleDevice.getDeviceId()) {
+            case DeviceId.CLOUD_LOCK:           //云锁
+                byte[] scanRecord = bleDevice.getScanRecord();
+                byte[] cloudLockRecord = CloudLockFilter.getClockLockRecord(scanRecord);
+                version = cloudLockRecord[4];
+                System.arraycopy(cloudLockRecord, 5, vendorId, 0, 4);
+                isActive = cloudLockRecord[9] == 1 ? true : false;
+                System.arraycopy(cloudLockRecord, 10, deviceType, 0, 2);
+                break;
 
-        System.arraycopy(cloudLockRecord, 5, vendorId, 0, 4);
-        isActive = cloudLockRecord[9] == 1 ? true : false;
-        System.arraycopy(cloudLockRecord, 10, deviceType, 0, 2);
+            case DeviceId.GATE_LOCK:            //门锁
+                String name = bleDevice.getName();
+                version = Integer.parseInt(name.substring(1, 3));
+                isActive = name.charAt(3) == '1' ? true : false;
+                break;
+
+            default:
+
+        }
     }
 
     public BleDevice getBleDevice() {
@@ -151,5 +202,7 @@ public class ScanDevice implements Parcelable {
         dest.writeByte((byte) (isActive ? 1 : 0));
         dest.writeByteArray(deviceType);
         dest.writeParcelable(bleDevice, flags);
+        dest.writeInt(deviceId);
+        dest.writeInt(version);
     }
 }

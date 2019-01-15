@@ -12,11 +12,12 @@ public class FrameHandlerTest {
 
     @Test
     public void test() {
+        FrameHandler.setFrameSize(200);
         FrameHandler frameHandler = new FrameHandler();
+
         byte[] data = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
-                1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
-                1, 2, 3,
-                30};
+                                1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
+                                0, 1, 30};
         List<byte[]> result =  frameHandler.handleSend(data);
 
         System.out.println("分包：");

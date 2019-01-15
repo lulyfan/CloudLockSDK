@@ -10,14 +10,22 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
 import com.ut.unilink.cloudLock.CallBack;
+import com.ut.unilink.cloudLock.CallBack2;
 import com.ut.unilink.cloudLock.CloudLock;
 import com.ut.unilink.cloudLock.ConnectListener;
 import com.ut.unilink.cloudLock.LockStateListener;
 import com.ut.unilink.cloudLock.ScanDevice;
 import com.ut.unilink.cloudLock.ScanListener;
 import com.ut.unilink.cloudLock.Unilink;
+import com.ut.unilink.cloudLock.protocol.data.AuthCountInfo;
+import com.ut.unilink.cloudLock.protocol.data.AuthInfo;
+import com.ut.unilink.cloudLock.protocol.data.CloudLockOperateRecord;
+import com.ut.unilink.cloudLock.protocol.data.GateLockKey;
+import com.ut.unilink.cloudLock.protocol.data.GateLockOperateRecord;
 import com.ut.unilink.util.Log;
 import com.zhichu.nativeplugin.ble.Ble;
+
+import java.util.List;
 
 /**
  * <p>云锁设备控制管理类。
@@ -146,28 +154,6 @@ public class UnilinkManager {
         return mUnilink.scan(scanListener, scanTime, vendorId, deviceType);
     }
 
-
-    /**
-     * 连接指定云锁设备
-     *
-     * @param mac             云锁设备MAC地址，可以从搜索获取的云锁设备{@link ScanDevice#getAddress()}得到
-     * @param connectListener 连接结果监听器
-     */
-    public void connect(String mac, final ConnectListener connectListener) {
-        mUnilink.connect(mac, connectListener);
-    }
-
-    /**
-     * 连接指定蓝牙设备
-     *
-     * @param mac               设备MAC地址
-     * @param connectListener   监听连接结果
-     * @param lockStateListener 连接成功后，监听云锁的状态信息
-     */
-    public void connect(String mac, ConnectListener connectListener, LockStateListener lockStateListener) {
-        mUnilink.connect(mac, connectListener, lockStateListener);
-    }
-
     /**
      * 连接指定蓝牙设备
      *
@@ -176,7 +162,7 @@ public class UnilinkManager {
      * @param lockStateListener 连接成功后，监听云锁的状态信息
      */
     public void connect(ScanDevice scanDevice, ConnectListener connectListener, LockStateListener lockStateListener) {
-        connect(scanDevice.getAddress(), connectListener, lockStateListener);
+        mUnilink.connect(scanDevice, connectListener, lockStateListener);
     }
 
     /**
@@ -186,7 +172,31 @@ public class UnilinkManager {
      * @param connectListener 监听连接结果
      */
     public void connect(ScanDevice scanDevice, ConnectListener connectListener) {
-        mUnilink.connect(scanDevice.getAddress(), connectListener);
+        mUnilink.connect(scanDevice, connectListener);
+    }
+
+    /**
+     * 连接指定蓝牙设备
+     * @param scanDevice 蓝牙低功耗设备 通过扫描得到{@link #scan(ScanListener, int, byte[], byte[])、 {@link #scan(ScanListener, int)}}
+     * @param encryptType 加密方式
+     * @param encryptKey  加密
+     * @param connectListener 监听连接结果
+     */
+    public void connect(ScanDevice scanDevice, final int encryptType, final byte[] encryptKey, ConnectListener connectListener) {
+        mUnilink.connect(scanDevice, encryptType, encryptKey, connectListener);
+    }
+
+    /**
+     * 连接指定蓝牙设备
+     * @param scanDevice 蓝牙低功耗设备 通过扫描得到{@link #scan(ScanListener, int, byte[], byte[])、 {@link #scan(ScanListener, int)}}
+     * @param encryptType 加密方式
+     * @param encryptKey  加密
+     * @param connectListener 监听连接结果
+     * @param lockStateListener 连接成功后，监听云锁的状态信息
+     */
+    public void connect(ScanDevice scanDevice, final int encryptType, final byte[] encryptKey, ConnectListener connectListener,
+                        LockStateListener lockStateListener) {
+        mUnilink.connect(scanDevice, encryptType, encryptKey, connectListener, lockStateListener);
     }
 
     public void disconnect(String UUID) {
@@ -486,6 +496,207 @@ public class UnilinkManager {
      */
     public void getProductInfo(final CloudLock lock, final CallBack callBack) {
         mUnilink.getProductInfo(lock, callBack);
+    }
+
+    /**
+     * 读取云锁开锁记录
+     * @param mac 设备mac地址
+     * @param encryptType 加密类型
+     * @param encryptKey 加密密钥
+     * @param readSerialNum 读取序号，取值范围1-40，序号为1代表读取最新的5条记录，序号越大读取的记录越旧
+     * @param callback 操作回调接口
+     */
+    public void readCLoudLockOpenLockRecord(String mac, int encryptType, byte[] encryptKey, int readSerialNum,
+                                            final CallBack2<List<CloudLockOperateRecord>> callback) {
+        mUnilink.readCLoudLockOpenLockRecord(mac, encryptType, encryptKey, readSerialNum, callback);
+    }
+
+    /**
+     * 批量修改授权信息（需要先从设备中读取授权信息）
+     * @param mac 设备mac地址
+     * @param encryptType 加密类型
+     * @param encryptKey 加密密钥
+     * @param authInfos 要修改的授权信息
+     * @param callback 操作回调接口
+     */
+    public void batchUpdateAuthInfos(String mac, int encryptType, byte[] encryptKey, List<AuthInfo> authInfos,
+                                     final CallBack2<Void> callback) {
+        mUnilink.batchUpdateAuthInfos(mac, encryptType, encryptKey, authInfos, callback);
+    }
+
+    /**
+     * 删除指定钥匙
+     * @param mac 设备mac地址
+     * @param encryptType 加密类型
+     * @param encryptKey 加密密钥
+     * @param keyId 要删除的钥匙ID
+     * @param callback 操作回调接口
+     */
+    public void deleteKey(String mac, int encryptType, byte[] encryptKey, int keyId, final CallBack2<Void> callback) {
+        mUnilink.deleteKey(mac, encryptType, encryptKey, keyId, callback);
+    }
+
+    /**
+     * 添加授权信息
+     * @param mac 设备mac地址
+     * @param encryptType 加密类型
+     * @param encryptKey 加密密钥
+     * @param authInfo 要添加的授权信息
+     * @param callback 操作回调接口
+     */
+    public void addAuth(String mac, int encryptType, byte[] encryptKey, AuthInfo authInfo, final CallBack2<Integer> callback) {
+        mUnilink.addAuth(mac, encryptType, encryptKey, authInfo, callback);
+    }
+
+    /**
+     * 删除指定授权信息
+     * @param mac 设备mac地址
+     * @param encryptType 加密类型
+     * @param encryptKey 加密密钥
+     * @param authId 要删除的授权ID
+     * @param callback 操作回调接口
+     */
+    public void deleteAuth(String mac, int encryptType, byte[] encryptKey, int authId, final CallBack2<Void> callback) {
+        mUnilink.deleteAuth(mac, encryptType, encryptKey, authId, callback);
+    }
+
+    /**
+     * 修改指定授权信息
+     * @param mac 设备mac地址
+     * @param encryptType 加密类型
+     * @param encryptKey 加密密钥
+     * @param authInfo 要修改的授权信息
+     * @param callback 操作回调接口
+     */
+    public void updateAuth(String mac, int encryptType, byte[] encryptKey, AuthInfo authInfo, final CallBack2<Void> callback) {
+        mUnilink.updateAuth(mac, encryptType, encryptKey, authInfo, callback);
+    }
+
+    /**
+     * 查询指定授权信息
+     * @param mac 设备mac地址
+     * @param encryptType 加密类型
+     * @param encryptKey 加密密钥
+     * @param authId 要查询的授权ID
+     * @param callback 操作回调接口
+     */
+    public void queryAuthById(String mac, int encryptType, byte[] encryptKey, int authId, final CallBack2<AuthInfo> callback) {
+        mUnilink.queryAuthById(mac, encryptType, encryptKey, authId, callback);
+    }
+
+    /**
+     * 查询所有的授权信息
+     * @param mac 设备mac地址
+     * @param encryptType 加密类型
+     * @param encryptKey 加密密钥
+     * @param callback 操作回调接口
+     */
+    public void queryAllAuth(String mac, int encryptType, byte[] encryptKey, final CallBack2<List<AuthInfo>> callback) {
+        mUnilink.queryAllAuth(mac, encryptType, encryptKey, callback);
+    }
+
+    /**
+     * 读取授权次数信息
+     * @param mac 设备mac地址
+     * @param encryptType 加密类型
+     * @param encryptKey 加密密钥
+     * @param callback 操作回调接口
+     */
+    public void readAuthCountInfo(String mac, int encryptType, byte[] encryptKey, final CallBack2<List<AuthCountInfo>> callback) {
+        mUnilink.readAuthCountInfo(mac, encryptType, encryptKey, callback);
+    }
+
+    /**
+     * 读取钥匙管理配置表
+     * @param mac 设备mac地址
+     * @param encryptType 加密类型
+     * @param encryptKey 加密密钥
+     * @param callback 操作回调接口
+     */
+    public void readKeyInfos(String mac, int encryptType, byte[] encryptKey, final CallBack2<List<GateLockKey>> callback) {
+        mUnilink.readKeyInfos(mac, encryptType, encryptKey, callback);
+    }
+
+    /**
+     * 写入钥匙管理配置表
+     * @param mac 设备mac地址
+     * @param encryptType 加密类型
+     * @param encryptKey 加密密钥
+     * @param gateLockKeys 要写入的钥匙管理配置表
+     * @param callback 操作回调接口
+     */
+    public void writeKeyInfos(String mac, int encryptType, byte[] encryptKey, List<GateLockKey> gateLockKeys,
+                              final CallBack2<Void> callback) {
+        mUnilink.writeKeyInfos(mac, encryptType, encryptKey, gateLockKeys, callback);
+    }
+
+    /**
+     * 读取智能门锁的开锁记录
+     * @param mac 设备mac地址
+     * @param encryptType 加密类型
+     * @param encryptKey 加密密钥
+     * @param readSerialNum 读取序号，取值范围1-40，序号为1代表读取最新的5条记录，序号越大读取的记录越旧
+     * @param callback 操作回调接口
+     */
+    public void readGateLockOpenLockRecord(String mac, int encryptType, byte[] encryptKey, int readSerialNum,
+                                           final CallBack2<List<GateLockOperateRecord>> callback) {
+        mUnilink.readGateLockOpenLockRecord(mac, encryptType, encryptKey, readSerialNum, callback);
+    }
+
+    /**
+     * 读取对时信息
+     * @param mac 设备mac地址
+     * @param encryptType 加密类型
+     * @param encryptKey 加密密钥
+     * @param callback 操作回调接口
+     */
+    public void readTime(String mac, int encryptType, byte[] encryptKey, final CallBack2<Long> callback) {
+        mUnilink.readTime(mac, encryptType, encryptKey, callback);
+    }
+
+    /**
+     * 写入对时信息
+     * @param mac 设备mac地址
+     * @param encryptType 加密类型
+     * @param encryptKey 加密密钥
+     * @param callback 操作回调接口
+     */
+    public void writeTime(String mac, int encryptType, byte[] encryptKey, final CallBack2<Void> callback) {
+        mUnilink.writeTime(mac, encryptType, encryptKey, callback);
+    }
+
+    /**
+     * 对门锁设备进行开锁操作
+     * @param mac 设备mac地址
+     * @param encryptType 加密类型
+     * @param encryptKey 加密密钥
+     * @param openLockPassword 开锁密码
+     * @param callback 操作回调接口
+     */
+    public void openGateLock(final String mac, final int encryptType, final byte[] encryptKey, byte[] openLockPassword,
+                             final CallBack2<Void> callback) {
+        mUnilink.openGateLock(mac, encryptType, encryptKey, openLockPassword, callback);
+    }
+
+    /**
+     * 对云锁设备进行开锁操作
+     * @param mac 设备mac地址
+     * @param encryptType 加密类型
+     * @param encryptKey 加密密钥
+     * @param openLockPassword 开锁密码
+     * @param callback 操作回调接口
+     */
+    public void openCloudLock(final String mac, final int encryptType, final byte[] encryptKey, byte[] openLockPassword,
+                              final CallBack2<Void> callback) {
+        mUnilink.openCloudLock(mac, encryptType, encryptKey, openLockPassword, callback);
+    }
+
+    /**
+     * 断开连接
+     * @param address
+     */
+    public void close(String address) {
+        mUnilink.close(address);
     }
 
     /**

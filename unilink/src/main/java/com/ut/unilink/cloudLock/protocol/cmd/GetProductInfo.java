@@ -18,7 +18,7 @@ public class GetProductInfo extends BleCmdBase<ProductInfo>{
     }
 
     @Override
-    ProductInfo parse(BleMsg msg) {
+    public ProductInfo parse(BleMsg msg) {
         ByteBuffer buffer = ByteBuffer.wrap(msg.getContent());
         ProductInfo data = new ProductInfo();
         buffer.get(data.getVersion());

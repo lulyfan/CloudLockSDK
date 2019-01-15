@@ -1,7 +1,7 @@
 package com.ut.unilink.cloudLock.protocol.cmd;
 
 public class ErrCode {
-
+    public static final int ERR_ENCRYPT = 0x00;        //解密错误
     public static final int ERR_FUNCTION_CODE = 0x01;  //非法功能码
     public static final int ERR_DATA = 0x02;           //非法数据
     public static final int ERR_DEVICE_BUSY = 0x03;    //设备忙
@@ -16,6 +16,10 @@ public class ErrCode {
     public static final int ERR_UNKNOW = 0xFF;            //未知错误
     public static final int ERR_TIMEOUT = -1;             //应答超时
     public static final int ERR_NO_CONNECT = -2;          //设备未连接
+    public static final int ERR_CONNECT_INTERRUPT = -5;   //连接中断
+
+    public static final int ERR_OPERATE_TYPE = -3;        //操作类型错误
+    public static final int ERR_READ_SERIAL_NUM = -4;     //读取序号错误
 
     public static String getMessage(int errCode) {
 
@@ -72,6 +76,18 @@ public class ErrCode {
 
             case ERR_UNKNOW:
                 errMsg = "未知错误";
+                break;
+
+            case ERR_READ_SERIAL_NUM:
+                errMsg = "读取序号超出取值范围";
+                break;
+
+            case ERR_CONNECT_INTERRUPT:
+                errMsg = "连接中断";
+                break;
+
+            case ERR_ENCRYPT:
+                errMsg = "解密异常";
                 break;
 
                 default:

@@ -232,8 +232,8 @@ public class PeripheralDevice extends BluetoothGattCallback {
                 }
             }
         } else {
-            if (readCallback != null) {
-                readCallback.onFailure(getBleDevice(), -1,
+            if (writeCallback != null) {
+                writeCallback.onFailure(getBleDevice(), -1,
                         "Write Operation Not Initiated");
             }
         }
@@ -312,7 +312,7 @@ public class PeripheralDevice extends BluetoothGattCallback {
                     : BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
         } else {
             Log.d("PeripheralDevice", "Characteristic " + characteristicUUID
-                    + " does not have NOTIFY or INDICATE property set");
+                    + " does not have NOTIFY or INDICATE property set1");
         }
         if (bluetoothGatt.writeDescriptor(descriptor)) {
             this.notifyCallback = notifyCallback;

@@ -6,24 +6,33 @@ import android.os.Looper;
 import com.ut.unilink.cloudLock.protocol.BleClient;
 import com.ut.unilink.cloudLock.protocol.BleMsg;
 import com.ut.unilink.cloudLock.protocol.ClientHelper;
+import com.ut.unilink.cloudLock.protocol.data.CloudLockState;
+import com.ut.unilink.cloudLock.protocol.data.GateLockState;
 import com.ut.unilink.cloudLock.protocol.data.LockState;
 import com.ut.unilink.util.Log;
+import com.zhichu.nativeplugin.ble.scan.DeviceId;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class CloundLockConnectionManager implements IConnectionManager {
+public class LockConnectionManager implements IConnectionManager {
 
-    private static final int CMD_DEVICE_STATE = 0x25;
+    private static final int CMD_DEVICE_STATE = 0x25;  //从设备上传状态信息
+    private static final int CMD_DEVICE_CLOSE = 0x30;  //从设备断开连接
 
     private Map<String, ClientHelper> mBleHelperMap = new HashMap<>();
     private Map<String, LockStateListener> mLockStateListenerMap = new HashMap<>();
-    private UTBleLink mUTBleLink;
+    private BaseBleLink bleLink;
     private FrameHandler frameHandler = new FrameHandler();
+    private Map<String, Integer> deviceIdMap = new HashMap<>();
+    private ConnectListener connectListener;
 
-    public CloundLockConnectionManager(UTBleLink UTBleLink) {
-        mUTBleLink = UTBleLink;
+    public LockConnectionManager() {
+    }
+
+    public void setBleLink(BaseBleLink bleLink) {
+        this.bleLink = bleLink;
     }
 
     public boolean isConnect(String address) {
@@ -31,7 +40,7 @@ public class CloundLockConnectionManager implements IConnectionManager {
     }
 
     @Override
-    public void onConnect(String address) {
+    public void onConnect(final String address) {
         final String deviceUUID = address;
         ClientHelper clientHelper = mBleHelperMap.get(deviceUUID);
 
@@ -43,9 +52,9 @@ public class CloundLockConnectionManager implements IConnectionManager {
                 @Override
                 public void onReceive(BleMsg msg) {
 
-                  if (msg.getCode() == CMD_DEVICE_STATE) {
+                    if (msg.getCode() == CMD_DEVICE_STATE) {
 
-                        final LockState lockState = parseLockState(msg);
+                        final LockState lockState = parseLockState(address, msg);
                         final LockStateListener lockStateListener = mLockStateListenerMap.get(deviceUUID);
 
                         if (lockStateListener != null) {
@@ -57,11 +66,18 @@ public class CloundLockConnectionManager implements IConnectionManager {
                                 }
                             });
                         }
+                    } else if (msg.getCode() == CMD_DEVICE_CLOSE) {
+                        Log.i("从设备断开连接");
+                        bleLink.close(deviceUUID);
                     }
                 }
             });
 
             mBleHelperMap.put(deviceUUID, clientHelper);
+        }
+
+        if (connectListener != null) {
+            connectListener.onConnect(address);
         }
     }
 
@@ -90,10 +106,30 @@ public class CloundLockConnectionManager implements IConnectionManager {
 
     public void send(String address, byte[] msg) {
 
+        int deviceId = getDeviceId(address);
+
+        if (deviceId == DeviceId.GATE_LOCK) {
+            FrameHandler.setFrameSize(512);
+        } else {
+            FrameHandler.setFrameSize(20);
+        }
+
         List<byte[]> datas = frameHandler.handleSend(msg);
         for (byte[] data : datas) {
-            mUTBleLink.send(address, data);
+            if (bleLink != null) {
+                bleLink.send(address, data);
+            }
         }
+    }
+
+    private int getDeviceId(String address) {
+        int deviceId = 0;
+        try {
+            deviceId = deviceIdMap.get(address);
+        } catch (Exception e) {
+
+        }
+        return deviceId;
     }
 
     public ClientHelper getBleHelper(String address) {
@@ -101,12 +137,29 @@ public class CloundLockConnectionManager implements IConnectionManager {
         return mBleHelperMap.get(address);
     }
 
-    private LockState parseLockState(BleMsg msg) {
-        return LockState.parseLockState(msg.getContent());
+    private LockState parseLockState(String address, BleMsg msg) {
+
+        int deviceId = getDeviceId(address);
+        LockState lockState = null;
+        if (deviceId == DeviceId.GATE_LOCK) {
+            lockState = new GateLockState();
+        } else {
+            lockState = new CloudLockState();
+        }
+
+        lockState.getLockState(msg.getContent());
+        return lockState;
     }
 
     void addLockStateListener(String address, LockStateListener lockStateListener) {
         mLockStateListenerMap.put(address, lockStateListener);
     }
 
+    public void setDeviceId(String address, int deviceId) {
+        deviceIdMap.put(address, deviceId);
+    }
+
+    public void setConnectListener(ConnectListener connectListener) {
+        this.connectListener = connectListener;
+    }
 }

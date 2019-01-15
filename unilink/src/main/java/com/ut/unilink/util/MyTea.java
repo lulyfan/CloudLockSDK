@@ -187,7 +187,7 @@ public class MyTea {
         long c = keys[2];
         long d = keys[3];
 
-        long sum = 0xC6EF3720, i; /* set up */
+        long sum = 0xC6EF3720, i; /* set1 up */
         long delta = 0x9e3779b9; /* a key schedule constant */
 
         int y = (int) left;

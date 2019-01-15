@@ -1,7 +1,11 @@
 package com.ut.unilink.cloudLock.protocol;
 
+import com.ut.unilink.cloudLock.protocol.cmd.ErrCode;
+
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -140,6 +144,17 @@ public class ClientHelper implements ClientBase.ReceiveListener {
     }
 
     public void close() {
+
+        Set<Map.Entry<Integer, SendedTask>> set = sendedTaskMap.entrySet();
+        Iterator iterator = set.iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Integer, SendedTask> entry = (Map.Entry<Integer, SendedTask>) iterator.next();
+            SendedTask sendedTask = entry.getValue();
+            sendedTask.scheduledFuture.cancel(true);
+            sendedTask.scheduledFuture = null;
+            sendedTask.responseListener.onNAk(sendedTask.sendmsg, ErrCode.ERR_CONNECT_INTERRUPT);
+        }
+
         if (client != null) {
             client.close();
             client = null;

@@ -18,14 +18,14 @@ public class CloudLock {
     private byte[] entryptKey;
     private int encryptType = -1;
     private int autuIncreaseNum;
-    private ScanDevice bleDevice;
+    private ScanDevice scanDevice;
     private byte currentDeviceNum;          //当前想要读取的设备编号，用于读取从设备节点信息命令
     private Map<Byte, byte[]> deviceInfoMap = new HashMap<>();
     private ProductInfo productInfo;
 
     public CloudLock(String mac) {
-        bleDevice = new ScanDevice();
-        bleDevice.setAddress(mac);
+        scanDevice = new ScanDevice();
+        scanDevice.setAddress(mac);
     }
 
     /**
@@ -34,29 +34,29 @@ public class CloudLock {
      * @return 6字节mac地址
      */
     public String getAddress() {
-        if (bleDevice == null) {
+        if (scanDevice == null) {
             return null;
         }
-        return bleDevice.getAddress();
+        return scanDevice.getAddress();
     }
 
     public void setAddress(String mac) {
-        if (bleDevice == null) {
-            bleDevice = new ScanDevice();
+        if (scanDevice == null) {
+            scanDevice = new ScanDevice();
         }
-        bleDevice.setAddress(mac);
+        scanDevice.setAddress(mac);
     }
 
     public ScanDevice getBleDevice() {
-        return bleDevice;
+        return scanDevice;
     }
 
     public String getName() {
-        return bleDevice.getName();
+        return scanDevice.getName();
     }
 
     public void setBleDevice(ScanDevice bleDevice) {
-        this.bleDevice = bleDevice;
+        this.scanDevice = bleDevice;
 
         if (bleDevice != null) {
             setVendorId(bleDevice.getVendorId());
@@ -69,7 +69,7 @@ public class CloudLock {
      * @return 激活状态
      */
     public boolean isActive() {
-        return bleDevice.isActive();
+        return scanDevice.isActive();
     }
 
     /**
@@ -78,7 +78,7 @@ public class CloudLock {
      * @param active
      */
     public void setActive(boolean active) {
-        bleDevice.setActive(active);
+        scanDevice.setActive(active);
     }
 
     /**
@@ -200,10 +200,10 @@ public class CloudLock {
      * @return 2字节设备类型
      */
     public byte[] getDeviceType() {
-        if (bleDevice == null) {
+        if (scanDevice == null) {
             return null;
         }
-        return bleDevice.getDeviceType();
+        return scanDevice.getDeviceType();
     }
 
     /**
@@ -212,9 +212,25 @@ public class CloudLock {
      * @param deviceType 数组长度为2
      */
     public void setDeviceType(byte[] deviceType) {
-        if (bleDevice != null) {
-            bleDevice.setDeviceType(deviceType);
+        if (scanDevice != null) {
+            scanDevice.setDeviceType(deviceType);
         }
+    }
+
+    /**
+     * 设置设备硬件标识
+     * @param deviceId
+     */
+    public void setDeviceId(int deviceId) {
+        scanDevice.setDeviceId(deviceId);
+    }
+
+    /**
+     * 获取设备硬件标识
+     * @return
+     */
+    public int getDeviceId() {
+        return scanDevice.getDeviceId();
     }
 
     /**

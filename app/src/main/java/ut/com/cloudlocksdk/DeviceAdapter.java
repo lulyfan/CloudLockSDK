@@ -32,7 +32,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ScanDevice clocdLock = ScanDevices.get(position);
-        holder.address.setText(clocdLock.getAddress());
+        holder.address.setText(clocdLock.getAddress() + " " + (clocdLock.getName() == null ? "UNKNOW" : clocdLock.getName()));
 
         if (itemClickListener != null) {
             holder.itemView.setOnClickListener(itemClickListener);

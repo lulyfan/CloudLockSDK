@@ -16,21 +16,13 @@ import java.util.List;
  * desc   :过滤优特蓝牙设备
  * version: 1.0
  */
-public class UTFilterScanCallback extends ScanCallback {
+public class CloudLockFilter extends DeviceFilter {
 
     private byte[] mVendorId;
     private byte[] mDeviceType;
 
-    public UTFilterScanCallback(IScanCallback iScanCallback) {
-        super(iScanCallback);
-//        super.serviceUUID("0001");
-//        super.serviceUUID("0001","FEE7");
-    }
-
-    public UTFilterScanCallback resetCallback(IScanCallback iScanCallback) {
-        super.bleDeviceFoundMap.clear();
-        super.bleDeviceList.clear();
-        return this;
+    public CloudLockFilter() {
+        super(DeviceId.CLOUD_LOCK);
     }
 
     public void setVendorId(byte[] vendorId) {

@@ -1,7 +1,7 @@
 package com.ut.unilink.util;
 
 public class Log {
-    private static boolean isEnableLog = false;
+    private static boolean isEnableLog = true;
     private static final String TAG = "unilink";
 
     public static void enableLog(boolean isEnable) {

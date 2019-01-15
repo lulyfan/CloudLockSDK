@@ -18,7 +18,7 @@ public class ReadAutoIncreaseNum extends BleCmdBase<ReadAutoIncreaseNum.Data>{
     }
 
     @Override
-    Data parse(BleMsg msg) {
+    public Data parse(BleMsg msg) {
         ByteBuffer buffer = ByteBuffer.wrap(msg.getContent());
         Data data = new Data();
         data.autoIncreaseNum = buffer.getShort();

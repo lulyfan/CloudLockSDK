@@ -1,5 +1,7 @@
 package com.ut.unilink.cloudLock.protocol;
 
+import com.ut.unilink.util.Log;
+
 import java.nio.ByteBuffer;
 
 public class BleMsg {
@@ -43,6 +45,8 @@ public class BleMsg {
         if (mEntrypt == null) {
             mEntrypt = NO_ENCRYPT;
         }
+
+        Log.i("加密前:" + Log.toUnsignedHex(buffer.array()));
         byte[] encryptMsg = mEntrypt.encrypt(buffer.array());
 
         return encryptMsg;
@@ -57,7 +61,9 @@ public class BleMsg {
             msg.mEntrypt = NO_ENCRYPT;
         }
 
-        ByteBuffer byteBuf = ByteBuffer.wrap(msg.getEntrypt().decrypt(data));
+        byte[] decryptData = msg.getEntrypt().decrypt(data);
+        ByteBuffer byteBuf = ByteBuffer.wrap(decryptData);
+        Log.i("解密后:" + Log.toUnsignedHex(decryptData));
 
         byte temp = byteBuf.get();
         msg.code = (byte) (temp & 0x7F);

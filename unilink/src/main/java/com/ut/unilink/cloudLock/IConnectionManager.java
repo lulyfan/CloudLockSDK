@@ -5,4 +5,8 @@ public interface IConnectionManager {
     void onDisConnect(String address, int code);
     void onReceive(String address, byte[] data);
     void send(String address, byte[] data);
+
+    public interface ConnectListener {
+        void onConnect(String address);
+    }
 }

@@ -14,7 +14,7 @@ public abstract class BleCmdBase<T> {
     protected static int autoIncreaseNum = 1;
 
     abstract public BleMsg build();
-    abstract T parse(BleMsg msg);
+    abstract public T parse(BleMsg msg);
 
     public void setClientHelper(ClientHelper clientHelper) {
         this.clientHelper = clientHelper;

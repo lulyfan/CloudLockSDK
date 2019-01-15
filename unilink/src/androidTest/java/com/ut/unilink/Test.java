@@ -4,7 +4,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.zhichu.nativeplugin.ble.BleDevice;
 import com.zhichu.nativeplugin.ble.scan.IScanCallback;
-import com.zhichu.nativeplugin.ble.scan.UTFilterScanCallback;
+import com.zhichu.nativeplugin.ble.scan.CloudLockFilter;
 
 import org.junit.runner.RunWith;
 
@@ -18,7 +18,7 @@ public class Test {
 
     @org.junit.Test
     public void test() {
-        UTFilterScanCallback scanCallback = new UTFilterScanCallback(new IScanCallback() {
+        CloudLockFilter scanCallback = new CloudLockFilter(new IScanCallback() {
             @Override
             public void onDeviceFound(BleDevice bleDevice, List<BleDevice> result) {
 

@@ -19,7 +19,7 @@ public class ReadDeviceMutilInfo extends BleCmdBase<ReadDeviceMutilInfo.Data>{
     }
 
     @Override
-    Data parse(BleMsg msg) {
+    public Data parse(BleMsg msg) {
         ByteBuffer buffer = ByteBuffer.wrap(msg.getContent());
         Data data = new Data();
         data.deviceNodeCount = buffer.get();

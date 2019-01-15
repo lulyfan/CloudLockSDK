@@ -12,11 +12,17 @@ import android.widget.Toast;
 
 import com.ut.unilink.UnilinkManager;
 import com.ut.unilink.cloudLock.CallBack;
+import com.ut.unilink.cloudLock.CallBack2;
 import com.ut.unilink.cloudLock.CloudLock;
 import com.ut.unilink.cloudLock.ConnectListener;
 import com.ut.unilink.cloudLock.LockStateListener;
 import com.ut.unilink.cloudLock.ScanDevice;
+import com.ut.unilink.cloudLock.protocol.data.AuthCountInfo;
+import com.ut.unilink.cloudLock.protocol.data.AuthInfo;
+import com.ut.unilink.cloudLock.protocol.data.GateLockKey;
+import com.ut.unilink.cloudLock.protocol.data.GateLockOperateRecord;
 import com.ut.unilink.cloudLock.protocol.data.LockState;
+import com.ut.unilink.util.BitUtil;
 import com.ut.unilink.util.Log;
 
 import java.io.File;
@@ -26,9 +32,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
 
 public class LockActivity extends AppCompatActivity {
 
@@ -96,6 +107,7 @@ public class LockActivity extends AppCompatActivity {
         lockInfo.openLockPW = cloudLock.getOpenLockPassword();
         lockInfo.encrypt = cloudLock.getEncryptType();
         lockInfo.key = cloudLock.getEntryptKey();
+        lockInfo.deviceId = cloudLock.getDeviceId();
 
         try {
             ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("/sdcard/lockInfo.txt"));
@@ -122,6 +134,7 @@ public class LockActivity extends AppCompatActivity {
             cloudLock.setEncryptType(lockInfo.encrypt);
             cloudLock.setEntryptKey(lockInfo.key);
             cloudLock.setActive(true);
+            cloudLock.setDeviceId(lockInfo.deviceId);
             return cloudLock;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -157,6 +170,28 @@ public class LockActivity extends AppCompatActivity {
         lockDialogFragment.show(getSupportFragmentManager(), "lockInfo");
     }
 
+    private ConnectListener connectListener = new ConnectListener() {
+        @Override
+        public void onConnect() {
+            LogInFile.write("connect success time:" + TimeRecord.end("connect") + "ms");
+            lock.setImageResource(R.drawable.lock_connect);
+        }
+
+        @Override
+        public void onDisconnect(int code, String message) {
+            Log.i("onDisconnect--------");
+            lock.setImageResource(R.drawable.lock_disconnect);
+        }
+    };
+
+    private LockStateListener lockStateListener = new LockStateListener() {
+        @Override
+        public void onState(final LockState state) {
+            power.setText("电量:" + state.getElect());
+
+        }
+    };
+
     public void onClick(View view) {
         switch (view.getId()) {
 
@@ -165,27 +200,21 @@ public class LockActivity extends AppCompatActivity {
                 break;
 
             case R.id.connect:
+            case R.id.connect2:
                 LogInFile.write("\nstart connect...");
                 TimeRecord.start("connect");
 
-                unilinkManager.connect(address, new ConnectListener() {
-                    @Override
-                    public void onConnect() {
-                        LogInFile.write("connect success time:" + TimeRecord.end("connect") + "ms");
-                        lock.setImageResource(R.drawable.lock_connect);
-                    }
+                if (mCloudLock == null) {
+                    unilinkManager.connect(device, connectListener, lockStateListener);
+                }
+                else {
+                    unilinkManager.connect(device, mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),
+                            connectListener, lockStateListener);
+                }
+                break;
 
-                    @Override
-                    public void onDisconnect(int code, String message) {
-                        lock.setImageResource(R.drawable.lock_disconnect);
-                    }
-                }, new LockStateListener() {
-                    @Override
-                    public void onState(final LockState state) {
-                        power.setText("电量:" + state.getElect());
-
-                    }
-                });
+            case R.id.disconnect:
+                unilinkManager.close(address);
                 break;
 
             case R.id.init:
@@ -243,6 +272,14 @@ public class LockActivity extends AppCompatActivity {
                         showMsg("confirm lock success");
 
                         saveLock(cloudLock);
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                String text = lockInfo.getText().toString().replace("未激活", "已激活");
+                                lockInfo.setText(text);
+                            }
+                        });
                     }
 
                     @Override
@@ -381,9 +418,18 @@ public class LockActivity extends AppCompatActivity {
                 unilinkManager.resetLock(mCloudLock, new CallBack() {
                     @Override
                     public void onSuccess(CloudLock cloudLock) {
+                        unilinkManager.close(address);
                         LogInFile.write("resetLock success time:" + TimeRecord.end("resetLock") + "ms");
                         showMsg("resetLock success");
                         clear();
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                String text = lockInfo.getText().toString().replace("已激活", "未激活");
+                                lockInfo.setText(text);
+                            }
+                        });
                     }
 
                     @Override
@@ -646,10 +692,460 @@ public class LockActivity extends AppCompatActivity {
                         showMsg("getProductInfo failed:" + errMsg);
                     }
                 });
+                break;
+
+            case R.id.readTime:
+                if (mCloudLock == null) {
+                    mCloudLock = readLock();
+                }
+
+                if (mCloudLock == null) {
+                    showMsg("获取锁信息失败，请先初始化锁");
+                    return;
+                }
+
+                unilinkManager.readTime(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),
+                        new CallBack2<Long>() {
+                            @Override
+                            public void onSuccess(Long data) {
+                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                showMsg("readTime:\n" + simpleDateFormat.format(new Date(data)));
+                            }
+
+                            @Override
+                            public void onFailed(int errCode, String errMsg) {
+                                showMsg("readTime failed:" + errMsg);
+                            }
+                        });
+                break;
+
+            case R.id.writeTime:
+                if (mCloudLock == null) {
+                    mCloudLock = readLock();
+                }
+
+                if (mCloudLock == null) {
+                    showMsg("获取锁信息失败，请先初始化锁");
+                    return;
+                }
+
+                unilinkManager.writeTime(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),
+                        new CallBack2<Void>() {
+                            @Override
+                            public void onSuccess(Void data) {
+                                showMsg("writeTime success");
+                            }
+
+                            @Override
+                            public void onFailed(int errCode, String errMsg) {
+                                showMsg("writeTime failed:" + errMsg);
+                            }
+                        });
+                break;
+
+            case R.id.readKeys:
+                if (mCloudLock == null) {
+                    mCloudLock = readLock();
+                }
+
+                if (mCloudLock == null) {
+                    showMsg("获取锁信息失败，请先初始化锁");
+                    return;
+                }
+
+                unilinkManager.readKeyInfos(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),
+                        new CallBack2<List<GateLockKey>>() {
+                            @Override
+                            public void onSuccess(List<GateLockKey> data) {
+
+                                gateLockKeys = data;
+
+                                String str = "";
+                                for (GateLockKey key : data) {
+                                    str += key.toString() + "\n\n";
+                                }
+                                MsgDialogFragment.show(LockActivity.this, "读取钥匙配置表成功", str);
+                            }
+
+                            @Override
+                            public void onFailed(int errCode, String errMsg) {
+                                showMsg("readKeyInfos failed " + errMsg);
+                            }
+                        });
+                break;
+
+            case R.id.writeKeys:
+                if (mCloudLock == null) {
+                    mCloudLock = readLock();
+                }
+
+                if (mCloudLock == null) {
+                    showMsg("获取锁信息失败，请先初始化锁");
+                    return;
+                }
+
+                if (gateLockKeys == null) {
+                    showMsg("请先读取钥匙配置表");
+                    return;
+                }
+
+                for (GateLockKey key : gateLockKeys) {
+                    key.setAuthState(!key.isAuthKey());
+                    key.setFreezeState(!key.isFreeze());
+                    key.setNameMarkState(!key.isNameMark());
+                }
+
+                unilinkManager.writeKeyInfos(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),
+                        gateLockKeys, new CallBack2<Void>() {
+                            @Override
+                            public void onSuccess(Void data) {
+                                String str = "";
+                                for (GateLockKey key : gateLockKeys) {
+                                    str += key + "\n\n";
+                                }
+                                MsgDialogFragment.show(LockActivity.this, "修改钥匙配置表成功", str);
+                            }
+
+                            @Override
+                            public void onFailed(int errCode, String errMsg) {
+                                showMsg("writeKeyInfos failed " + errMsg);
+                            }
+                        });
+                break;
+
+            case R.id.readGateLockOpenRecord:
+                if (mCloudLock == null) {
+                    mCloudLock = readLock();
+                }
+
+                if (mCloudLock == null) {
+                    showMsg("获取锁信息失败，请先初始化锁");
+                    return;
+                }
+
+                unilinkManager.readGateLockOpenLockRecord(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),
+                        1, new CallBack2<List<GateLockOperateRecord>>() {
+                            @Override
+                            public void onSuccess(List<GateLockOperateRecord> data) {
+                                String str = "";
+                                for (GateLockOperateRecord record : data) {
+                                    str += record.toString() + "\n\n";
+                                }
+                                MsgDialogFragment.show(LockActivity.this, "读取开锁记录成功", str);
+                            }
+
+                            @Override
+                            public void onFailed(int errCode, String errMsg) {
+                                showMsg("openLockRecord failed " + errMsg);
+                            }
+                        });
+                break;
+
+            case R.id.readAuthCount:
+                if (mCloudLock == null) {
+                    mCloudLock = readLock();
+                }
+
+                if (mCloudLock == null) {
+                    showMsg("获取锁信息失败，请先初始化锁");
+                    return;
+                }
+
+                unilinkManager.readAuthCountInfo(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),
+                        new CallBack2<List<AuthCountInfo>>() {
+                            @Override
+                            public void onSuccess(List<AuthCountInfo> data) {
+                                String str = "";
+                                for (AuthCountInfo authCountInfo : data) {
+                                    str += authCountInfo.toString() + "\n\n";
+                                }
+                                MsgDialogFragment.show(LockActivity.this, "读取授权次数成功", str);
+                            }
+
+                            @Override
+                            public void onFailed(int errCode, String errMsg) {
+                                showMsg("readAuthCountInfo failed " + errMsg);
+                            }
+                        });
+                break;
+
+            case R.id.delKey:
+                if (mCloudLock == null) {
+                    mCloudLock = readLock();
+                }
+
+                if (mCloudLock == null) {
+                    showMsg("获取锁信息失败，请先初始化锁");
+                    return;
+                }
+
+                if (gateLockKeys == null) {
+                    showMsg("请先读取钥匙配置表");
+                    return;
+                }
+
+                if (gateLockKeys.size() <= 0) {
+                    showMsg("没有可删除的钥匙，请先读取钥匙配置表");
+                    return;
+                }
+
+                final int delKeyID = gateLockKeys.get(gateLockKeys.size() - 1).getKeyId();
+                unilinkManager.deleteKey(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),
+                        delKeyID, new CallBack2<Void>() {
+                            @Override
+                            public void onSuccess(Void data) {
+                                MsgDialogFragment.show(LockActivity.this, "删除钥匙成功", "删除钥匙ID:" + delKeyID);
+                                gateLockKeys.remove(gateLockKeys.size() - 1);
+                            }
+
+                            @Override
+                            public void onFailed(int errCode, String errMsg) {
+                                showMsg("deleteKey failed " + errMsg);
+                            }
+                        });
+                break;
+
+            case R.id.batchUpdateAuth:
+                if (mCloudLock == null) {
+                    mCloudLock = readLock();
+                }
+
+                if (mCloudLock == null) {
+                    showMsg("获取锁信息失败，请先初始化锁");
+                    return;
+                }
+
+                if (authInfos == null) {
+                    showMsg("请先获取授权表信息");
+                    return;
+                }
+
+                Random random2 = new Random();
+                for (AuthInfo authInfo : authInfos) {
+                    byte validWeekDay = (byte) BitUtil.set1(random2.nextInt(256), 7);
+                    authInfo.setValidWeekDay(validWeekDay);
+                    authInfo.setOpenLockCount((byte) (authInfo.getOpenLockCount() + 1));
+                    authInfo.setStartTime(new Date().getTime());
+                    authInfo.setEndTime(new Date().getTime());
+                }
+
+                unilinkManager.batchUpdateAuthInfos(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),
+                        authInfos, new CallBack2<Void>() {
+                            @Override
+                            public void onSuccess(Void data) {
+                                String str = "";
+                                for (AuthInfo authInfo : authInfos) {
+                                    str += authInfo + "\n\n";
+                                }
+                                MsgDialogFragment.show(LockActivity.this, "批量修改授权成功", str);
+                            }
+
+                            @Override
+                            public void onFailed(int errCode, String errMsg) {
+                                showMsg("batchUpdateAuthInfos failed " + errMsg);
+                            }
+                        });
+                break;
+
+            case R.id.addAuth:
+                if (mCloudLock == null) {
+                    mCloudLock = readLock();
+                }
+
+                if (mCloudLock == null) {
+                    showMsg("获取锁信息失败，请先初始化锁");
+                    return;
+                }
+
+                if (gateLockKeys == null || gateLockKeys.size() <= 0) {
+                    showMsg("没有可用钥匙，请先读取钥匙配置表");
+                    return;
+                }
+
+                Random random3 = new Random();
+                final AuthInfo authInfo = new AuthInfo();
+                authInfo.setKeyId(gateLockKeys.get(0).getKeyId());
+                byte validWeekDay = (byte) BitUtil.set1(random3.nextInt(256), 7);
+                authInfo.setValidWeekDay(validWeekDay);
+                authInfo.setOpenLockCount((byte) (authInfo.getOpenLockCount() + 1));
+                authInfo.setStartTime(new Date().getTime());
+                authInfo.setEndTime(new Date().getTime());
+
+                unilinkManager.addAuth(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(), authInfo,
+                        new CallBack2<Integer>() {
+                            @Override
+                            public void onSuccess(Integer data) {
+                                authInfo.setAuthId(data.byteValue());
+                                if (authInfos == null) {
+                                    authInfos = new ArrayList<>();
+                                }
+                                authInfos.add(authInfo);
+                                MsgDialogFragment.show(LockActivity.this, "添加授权成功", authInfo.toString());
+                            }
+
+                            @Override
+                            public void onFailed(int errCode, String errMsg) {
+                                showMsg("addAuth failed " + errMsg);
+                            }
+                        });
+                break;
+
+            case R.id.updateAuth:
+                if (mCloudLock == null) {
+                    mCloudLock = readLock();
+                }
+
+                if (mCloudLock == null) {
+                    showMsg("获取锁信息失败，请先初始化锁");
+                    return;
+                }
+
+                if (authInfos == null) {
+                    showMsg("请先读取授权配置表");
+                    return;
+                }
+
+                if (authInfos.size() <= 0) {
+                    showMsg("没有可修改的授权信息，请先读取授权配置表");
+                    return;
+                }
+
+                Random random4 = new Random();
+                final AuthInfo authInfo1 = authInfos.get(0);
+                authInfo1.setValidWeekDay((byte) BitUtil.set1(random4.nextInt(256), 7));
+                authInfo1.setOpenLockCount((byte) (authInfo1.getOpenLockCount() + 1));
+                authInfo1.setStartTime(new Date().getTime());
+                authInfo1.setEndTime(new Date().getTime());
+
+                unilinkManager.updateAuth(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(), authInfo1,
+                        new CallBack2<Void>() {
+                            @Override
+                            public void onSuccess(Void data) {
+                                MsgDialogFragment.show(LockActivity.this, "修改授权成功", authInfo1.toString());
+                            }
+
+                            @Override
+                            public void onFailed(int errCode, String errMsg) {
+                                showMsg("updateAuth failed " + errMsg);
+                            }
+                        });
+                break;
+
+            case R.id.delAuth:
+                if (mCloudLock == null) {
+                    mCloudLock = readLock();
+                }
+
+                if (mCloudLock == null) {
+                    showMsg("获取锁信息失败，请先初始化锁");
+                    return;
+                }
+
+                if (authInfos == null || authInfos.size() <= 0) {
+                    showMsg("没有可删除的授权，请先读取授权授权配置表或添加授权");
+                    return;
+                }
+
+                final int delAuthID = authInfos.get(0).getAuthId();
+                unilinkManager.deleteAuth(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),
+                        delAuthID, new CallBack2<Void>() {
+                            @Override
+                            public void onSuccess(Void data) {
+                                MsgDialogFragment.show(LockActivity.this, "删除授权成功", "删除授权ID:" + delAuthID);
+                                authInfos.remove(0);
+                            }
+
+                            @Override
+                            public void onFailed(int errCode, String errMsg) {
+                                showMsg("deleteAuth failed "+ errMsg);
+                            }
+                        });
+                break;
+
+            case R.id.queryAuth:
+                if (mCloudLock == null) {
+                    mCloudLock = readLock();
+                }
+
+                if (mCloudLock == null) {
+                    showMsg("获取锁信息失败，请先初始化锁");
+                    return;
+                }
+
+                unilinkManager.queryAllAuth(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),
+                        new CallBack2<List<AuthInfo>>() {
+                            @Override
+                            public void onSuccess(List<AuthInfo> data) {
+                                authInfos = data;
+                                String str = "";
+                                for (AuthInfo authInfo2 : data) {
+                                    str += authInfo2.toString() + "\n\n";
+                                }
+                                MsgDialogFragment.show(LockActivity.this, "查询授权成功", str);
+                            }
+
+                            @Override
+                            public void onFailed(int errCode, String errMsg) {
+                                showMsg("queryAuth failed " + errMsg);
+                            }
+                        });
+                break;
+
+            case R.id.openCloudLock:
+                if (mCloudLock == null) {
+                    mCloudLock = readLock();
+                }
+
+                if (mCloudLock == null) {
+                    showMsg("获取锁信息失败，请先初始化锁");
+                    return;
+                }
+
+                unilinkManager.openCloudLock(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),
+                        mCloudLock.getOpenLockPassword(), new CallBack2<Void>() {
+                            @Override
+                            public void onSuccess(Void data) {
+                                showMsg("云锁打开成功");
+                            }
+
+                            @Override
+                            public void onFailed(int errCode, String errMsg) {
+                                showMsg("云锁打开失败:" + errMsg);
+                            }
+                        });
+                break;
+
+            case R.id.openGateLock:
+                if (mCloudLock == null) {
+                    mCloudLock = readLock();
+                }
+
+                if (mCloudLock == null) {
+                    showMsg("获取锁信息失败，请先初始化锁");
+                    return;
+                }
+
+                unilinkManager.openGateLock(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),
+                        mCloudLock.getOpenLockPassword(), new CallBack2<Void>() {
+                            @Override
+                            public void onSuccess(Void data) {
+                                showMsg("门锁打开成功");
+                            }
+
+                            @Override
+                            public void onFailed(int errCode, String errMsg) {
+                                showMsg("门锁打开失败：" + errMsg);
+                            }
+                        });
+                break;
 
                 default:
+
         }
     }
+
+    private List<AuthInfo> authInfos;
+    private List<GateLockKey> gateLockKeys;
 
     private void showMsg(final String msg) {
         runOnUiThread(new Runnable() {

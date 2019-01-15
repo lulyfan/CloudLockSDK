@@ -10,10 +10,10 @@ import java.util.List;
 
 public class FrameHandler{
     private static final byte[] HEAD = {(byte) 0xA5, 0x5A};
-    private static final int SIZE_FRAME = 20;
+    private static int SIZE_FRAME = 20;
     private static final int SIZE_FRAME_CONTROL = 2 + 1 + 1 + 1 + 2; //帧结构信息大小: 同步头 + 报文长度 + 控制字 + ID + 校验码
-    private static final int SIZE_FRAME_CONTENT = 20 - SIZE_FRAME_CONTROL;  //帧内容大小
-    private static final int SIZE_MSG_BUFFER = 100;
+    private static int SIZE_FRAME_CONTENT = SIZE_FRAME - SIZE_FRAME_CONTROL;  //帧内容大小
+    private static final int SIZE_MSG_BUFFER = 512;
 
     private byte[] msgBuffer = new byte[SIZE_MSG_BUFFER];     //用来存放一条消息
     private int currentCmdID = -1;
@@ -36,8 +36,6 @@ public class FrameHandler{
 
         byte[] data = new byte[msg.length - 3];
         System.arraycopy(msg, 0, data, 0, data.length);
-
-//        Log.i("加密前：" + Log.toUnsignedHex(data, " "));
 
         int dataLength = data.length;
 
@@ -80,7 +78,7 @@ public class FrameHandler{
 
             result.add(item);
 
-//            Log.i("加密后：" + Log.toUnsignedHex(item, " "));
+            Log.i("分包" + i + ":" + Log.toUnsignedHex(item, " "));
         }
 
         return result;
@@ -96,6 +94,8 @@ public class FrameHandler{
         if (!check(data)) {
             return null;
         }
+
+        Log.i("收到包:" + Log.toUnsignedHex(data));
 
         ByteBuffer buffer = ByteBuffer.wrap(data);
         buffer.position(HEAD.length);
@@ -171,5 +171,10 @@ public class FrameHandler{
         }
 
         return true;
+    }
+
+    public static void setFrameSize(int size) {
+        SIZE_FRAME = size;
+        SIZE_FRAME_CONTENT = SIZE_FRAME - SIZE_FRAME_CONTROL;
     }
 }

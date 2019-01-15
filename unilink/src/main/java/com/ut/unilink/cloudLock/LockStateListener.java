@@ -1,10 +1,11 @@
 package com.ut.unilink.cloudLock;
 
+import com.ut.unilink.cloudLock.protocol.data.CloudLockState;
 import com.ut.unilink.cloudLock.protocol.data.LockState;
 
 /**
  * <p>云锁状态监听器.
- * <p>在连接时设置云锁状态监听器{@link com.ut.unilink.UnilinkManager#connect(String, ConnectListener, LockStateListener)},
+ * <p>在连接时设置云锁状态监听器
  * 连接成功后即可以获取云锁状态信息
  */
 public interface LockStateListener {

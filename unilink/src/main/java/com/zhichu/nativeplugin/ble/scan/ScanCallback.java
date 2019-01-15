@@ -2,6 +2,7 @@ package com.zhichu.nativeplugin.ble.scan;
 
 import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
@@ -35,6 +36,9 @@ public class ScanCallback extends android.bluetooth.le.ScanCallback implements I
     protected Map<String, BleDevice> bleDeviceFoundMap;
     protected List<BleDevice> bleDeviceList;
     private int scanSecond = DEFAULT_SCANSECOND;
+
+    private List<DeviceFilter> deviceFilters = new ArrayList<>();  //用来过滤指定设备
+    private DeviceFilter currentDeviceFilter;
 
     public ScanCallback(IScanCallback iScanCallback) {
         this.iScanCallback = iScanCallback;
@@ -192,6 +196,9 @@ public class ScanCallback extends android.bluetooth.le.ScanCallback implements I
                 bleDevice = new BleDevice(device, rssi, scanRecord);
                 bleDeviceFoundMap.put(device.getAddress(), bleDevice);
             }
+
+            bleDevice.setDeviceId(currentDeviceFilter.getDeviceId());
+
             if (iScanCallback != null) {
                 bleDeviceList.clear();
                 bleDeviceList.addAll(bleDeviceFoundMap.values());
@@ -205,7 +212,19 @@ public class ScanCallback extends android.bluetooth.le.ScanCallback implements I
 
     @Override
     public boolean onFilter(BluetoothDevice device, int rssi, byte[] scanRecord) {
-        return true;
+        for (DeviceFilter deviceFilter : deviceFilters) {
+            if (deviceFilter.onFilter(device, rssi, scanRecord)) {
+                currentDeviceFilter = deviceFilter;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void addFilter(DeviceFilter deviceFilter) {
+        if (deviceFilter != null) {
+            deviceFilters.add(deviceFilter);
+        }
     }
 
 }

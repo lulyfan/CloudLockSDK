@@ -17,7 +17,7 @@ public class ReadVendorId extends BleCmdBase<ReadVendorId.Data> {
     }
 
     @Override
-    Data parse(BleMsg msg) {
+    public Data parse(BleMsg msg) {
         ByteBuffer buffer = ByteBuffer.wrap(msg.getContent());
         Data data = new Data();
         buffer.get(data.vendorId);
