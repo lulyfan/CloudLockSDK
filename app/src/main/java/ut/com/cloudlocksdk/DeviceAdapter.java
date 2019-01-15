@@ -15,7 +15,7 @@ import java.util.List;
 public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder>{
 
     private final Context mContext;
-    private List<ScanDevice> ScanDevices;
+    private List<ScanDevice> scanDevices;
 
     public DeviceAdapter(Context context) {
         mContext = context;
@@ -31,8 +31,8 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        ScanDevice clocdLock = ScanDevices.get(position);
-        holder.address.setText(clocdLock.getAddress() + " " + (clocdLock.getName() == null ? "UNKNOW" : clocdLock.getName()));
+        ScanDevice scanDevice = scanDevices.get(position);
+        holder.address.setText(scanDevice.getAddress() + " " + (scanDevice.getName() == null ? "UNKNOW" : scanDevice.getName()));
 
         if (itemClickListener != null) {
             holder.itemView.setOnClickListener(itemClickListener);
@@ -41,11 +41,11 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 
     @Override
     public int getItemCount() {
-        return ScanDevices == null ? 0 : ScanDevices.size();
+        return scanDevices == null ? 0 : scanDevices.size();
     }
 
     public void setScanDevices(List<ScanDevice> scanDevices) {
-        this.ScanDevices = scanDevices;
+        this.scanDevices = scanDevices;
         notifyDataSetChanged();
     }
 
@@ -56,7 +56,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
     }
 
     public List<ScanDevice> getScanDevices() {
-        return ScanDevices;
+        return scanDevices;
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder{

@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import com.zhichu.nativeplugin.ble.BleDevice;
 import com.zhichu.nativeplugin.ble.scan.CloudLockFilter;
 import com.zhichu.nativeplugin.ble.scan.DeviceId;
+import com.zhichu.nativeplugin.ble.scan.GateLockFilter;
 
 /**
  * <p>表示通过蓝牙搜索出的设备。
@@ -20,6 +21,7 @@ public class ScanDevice implements Parcelable {
     private BleDevice bleDevice;
     private int deviceId;
     private int version;
+    private String name;
 
     public ScanDevice() {
     }
@@ -56,7 +58,10 @@ public class ScanDevice implements Parcelable {
     }
 
     public String getName() {
-        return bleDevice.getName();
+        if (name == null) {
+            name = bleDevice.getName();
+        }
+        return name;
     }
 
     /**
@@ -175,7 +180,9 @@ public class ScanDevice implements Parcelable {
                 break;
 
             case DeviceId.GATE_LOCK:            //门锁
-                String name = bleDevice.getName();
+                byte[] scanRecord2 = bleDevice.getScanRecord();
+                String name = GateLockFilter.getName(scanRecord2);
+                this.name = name;
                 version = Integer.parseInt(name.substring(1, 3));
                 isActive = name.charAt(3) == '1' ? true : false;
                 break;

@@ -48,8 +48,12 @@ public class InitLock extends BleCmdBase<InitLock.Data>{
         random.nextBytes(adminPassword);
         random.nextBytes(openLockPassword);
         random.nextBytes(secretKey);
-//        encryptVersion = (byte) random.nextInt(1);
-        encryptVersion = 1;
+        encryptVersion = (byte) random.nextInt(2);
+
+        Log.i("adminPassword:" + Log.toUnsignedHex(adminPassword));
+        Log.i("openLockPassword:" + Log.toUnsignedHex(openLockPassword));
+        Log.i("secretKey:" + Log.toUnsignedHex(secretKey));
+        Log.i("encryptVersion:" + encryptVersion);
     }
 
     public byte[] getAdminPassword() {
