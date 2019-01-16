@@ -65,7 +65,6 @@ public class Unilink {
     private UTBleLink utBleLink;
     private JinouxBleLink jinouxBleLink;
     private Map<Integer, BaseBleLink> bleLinkMap = new HashMap<>();
-    private Map<String, Integer> deviceIdMap = new HashMap<>();
 
     private static final int ENCRYPT_TEA = 0;
     private static final int ENCRYPT_AES = 1;
@@ -95,18 +94,6 @@ public class Unilink {
     /**
      * 连接指定蓝牙设备
      *
-     * @param scanDevice        蓝牙低功耗设备
-     * @param connectListener   监听连接结果
-     * @param lockStateListener 连接成功后，监听云锁的状态信息
-     */
-    public void connect(ScanDevice scanDevice, ConnectListener connectListener, LockStateListener lockStateListener) {
-        addLockStateListener(scanDevice.getAddress(), lockStateListener);
-        connect(scanDevice, connectListener);
-    }
-
-    /**
-     * 连接指定蓝牙设备
-     *
      * @param scanDevice      蓝牙低功耗设备
      * @param connectListener 监听连接结果
      */
@@ -121,10 +108,6 @@ public class Unilink {
     public void connect(ScanDevice scanDevice, final int encryptType, final byte[] encryptKey, ConnectListener connectListener,
                         LockStateListener lockStateListener) {
         addLockStateListener(scanDevice.getAddress(), lockStateListener);
-        connect(scanDevice, encryptType, encryptKey, connectListener);
-    }
-
-    public void connect(ScanDevice scanDevice, final int encryptType, final byte[] encryptKey, ConnectListener connectListener) {
         mConnectionManager.setConnectListener(new IConnectionManager.ConnectListener() {
             @Override
             public void onConnect(String address) {

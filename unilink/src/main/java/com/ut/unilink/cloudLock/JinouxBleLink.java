@@ -23,7 +23,7 @@ public class JinouxBleLink extends BaseBleLink {
     private String address;
     private ConnectListener connectListener;
     private Context context;
-    private static final String TAG = "bleTest";
+    private static final String TAG = "jinoux";
     private Handler handler;
     private boolean isBind;
 

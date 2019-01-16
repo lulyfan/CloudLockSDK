@@ -205,7 +205,7 @@ public class LockActivity extends AppCompatActivity {
                 TimeRecord.start("connect");
 
                 if (mCloudLock == null) {
-                    unilinkManager.connect(device, connectListener, lockStateListener);
+                    unilinkManager.connect(device, connectListener);
                 }
                 else {
                     unilinkManager.connect(device, mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),

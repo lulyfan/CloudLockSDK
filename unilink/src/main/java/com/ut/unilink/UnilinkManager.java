@@ -157,33 +157,11 @@ public class UnilinkManager {
     /**
      * 连接指定蓝牙设备
      *
-     * @param scanDevice        蓝牙低功耗设备 通过扫描得到{@link #scan(ScanListener, int, byte[], byte[])、 {@link #scan(ScanListener, int)}}
-     * @param connectListener   监听连接结果
-     * @param lockStateListener 连接成功后，监听云锁的状态信息
-     */
-    public void connect(ScanDevice scanDevice, ConnectListener connectListener, LockStateListener lockStateListener) {
-        mUnilink.connect(scanDevice, connectListener, lockStateListener);
-    }
-
-    /**
-     * 连接指定蓝牙设备
-     *
      * @param scanDevice      蓝牙低功耗设备 通过扫描得到{@link #scan(ScanListener, int, byte[], byte[])、 {@link #scan(ScanListener, int)}}
      * @param connectListener 监听连接结果
      */
     public void connect(ScanDevice scanDevice, ConnectListener connectListener) {
         mUnilink.connect(scanDevice, connectListener);
-    }
-
-    /**
-     * 连接指定蓝牙设备
-     * @param scanDevice 蓝牙低功耗设备 通过扫描得到{@link #scan(ScanListener, int, byte[], byte[])、 {@link #scan(ScanListener, int)}}
-     * @param encryptType 加密方式
-     * @param encryptKey  加密
-     * @param connectListener 监听连接结果
-     */
-    public void connect(ScanDevice scanDevice, final int encryptType, final byte[] encryptKey, ConnectListener connectListener) {
-        mUnilink.connect(scanDevice, encryptType, encryptKey, connectListener);
     }
 
     /**
