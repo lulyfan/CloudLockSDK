@@ -208,7 +208,7 @@ public class LockActivity extends AppCompatActivity {
                     unilinkManager.connect(device, connectListener);
                 }
                 else {
-                    unilinkManager.connect(device, mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),
+                    unilinkManager.connect(device, mCloudLock.getEncryptType(), mCloudLock.getEntryptKeyString(),
                             connectListener, lockStateListener);
                 }
                 break;
@@ -704,7 +704,7 @@ public class LockActivity extends AppCompatActivity {
                     return;
                 }
 
-                unilinkManager.readTime(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),
+                unilinkManager.readTime(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKeyString(),
                         new CallBack2<Long>() {
                             @Override
                             public void onSuccess(Long data) {
@@ -729,7 +729,7 @@ public class LockActivity extends AppCompatActivity {
                     return;
                 }
 
-                unilinkManager.writeTime(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),
+                unilinkManager.writeTime(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKeyString(),
                         new CallBack2<Void>() {
                             @Override
                             public void onSuccess(Void data) {
@@ -753,7 +753,7 @@ public class LockActivity extends AppCompatActivity {
                     return;
                 }
 
-                unilinkManager.readKeyInfos(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),
+                unilinkManager.readKeyInfos(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKeyString(),
                         new CallBack2<List<GateLockKey>>() {
                             @Override
                             public void onSuccess(List<GateLockKey> data) {
@@ -795,7 +795,7 @@ public class LockActivity extends AppCompatActivity {
                     key.setNameMarkState(!key.isNameMark());
                 }
 
-                unilinkManager.writeKeyInfos(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),
+                unilinkManager.writeKeyInfos(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKeyString(),
                         gateLockKeys, new CallBack2<Void>() {
                             @Override
                             public void onSuccess(Void data) {
@@ -823,7 +823,7 @@ public class LockActivity extends AppCompatActivity {
                     return;
                 }
 
-                unilinkManager.readGateLockOpenLockRecord(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),
+                unilinkManager.readGateLockOpenLockRecord(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKeyString(),
                         1, new CallBack2<List<GateLockOperateRecord>>() {
                             @Override
                             public void onSuccess(List<GateLockOperateRecord> data) {
@@ -851,7 +851,7 @@ public class LockActivity extends AppCompatActivity {
                     return;
                 }
 
-                unilinkManager.readAuthCountInfo(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),
+                unilinkManager.readAuthCountInfo(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKeyString(),
                         new CallBack2<List<AuthCountInfo>>() {
                             @Override
                             public void onSuccess(List<AuthCountInfo> data) {
@@ -890,7 +890,7 @@ public class LockActivity extends AppCompatActivity {
                 }
 
                 final int delKeyID = gateLockKeys.get(gateLockKeys.size() - 1).getKeyId();
-                unilinkManager.deleteKey(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),
+                unilinkManager.deleteKey(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKeyString(),
                         delKeyID, new CallBack2<Void>() {
                             @Override
                             public void onSuccess(Void data) {
@@ -929,7 +929,7 @@ public class LockActivity extends AppCompatActivity {
                     authInfo.setEndTime(new Date().getTime());
                 }
 
-                unilinkManager.batchUpdateAuthInfos(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),
+                unilinkManager.batchUpdateAuthInfos(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKeyString(),
                         authInfos, new CallBack2<Void>() {
                             @Override
                             public void onSuccess(Void data) {
@@ -971,7 +971,7 @@ public class LockActivity extends AppCompatActivity {
                 authInfo.setStartTime(new Date().getTime());
                 authInfo.setEndTime(new Date().getTime());
 
-                unilinkManager.addAuth(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(), authInfo,
+                unilinkManager.addAuth(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKeyString(), authInfo,
                         new CallBack2<Integer>() {
                             @Override
                             public void onSuccess(Integer data) {
@@ -1017,7 +1017,7 @@ public class LockActivity extends AppCompatActivity {
                 authInfo1.setStartTime(new Date().getTime());
                 authInfo1.setEndTime(new Date().getTime());
 
-                unilinkManager.updateAuth(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(), authInfo1,
+                unilinkManager.updateAuth(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKeyString(), authInfo1,
                         new CallBack2<Void>() {
                             @Override
                             public void onSuccess(Void data) {
@@ -1047,7 +1047,7 @@ public class LockActivity extends AppCompatActivity {
                 }
 
                 final int delAuthID = authInfos.get(0).getAuthId();
-                unilinkManager.deleteAuth(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),
+                unilinkManager.deleteAuth(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKeyString(),
                         delAuthID, new CallBack2<Void>() {
                             @Override
                             public void onSuccess(Void data) {
@@ -1072,7 +1072,7 @@ public class LockActivity extends AppCompatActivity {
                     return;
                 }
 
-                unilinkManager.queryAllAuth(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),
+                unilinkManager.queryAllAuth(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKeyString(),
                         new CallBack2<List<AuthInfo>>() {
                             @Override
                             public void onSuccess(List<AuthInfo> data) {
@@ -1101,7 +1101,7 @@ public class LockActivity extends AppCompatActivity {
                     return;
                 }
 
-                unilinkManager.openCloudLock(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),
+                unilinkManager.openCloudLock(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKeyString(),
                         mCloudLock.getOpenLockPassword(), new CallBack2<Void>() {
                             @Override
                             public void onSuccess(Void data) {
@@ -1125,7 +1125,7 @@ public class LockActivity extends AppCompatActivity {
                     return;
                 }
 
-                unilinkManager.openGateLock(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKey(),
+                unilinkManager.openGateLock(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKeyString(),
                         mCloudLock.getOpenLockPassword(), new CallBack2<Void>() {
                             @Override
                             public void onSuccess(Void data) {

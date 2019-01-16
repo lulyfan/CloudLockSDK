@@ -41,6 +41,7 @@ import com.ut.unilink.cloudLock.protocol.data.GateLockNodeInfo;
 import com.ut.unilink.cloudLock.protocol.data.GateLockOperateRecord;
 import com.ut.unilink.cloudLock.protocol.data.GateLockState;
 import com.ut.unilink.cloudLock.protocol.data.ProductInfo;
+import com.ut.unilink.util.Base64;
 import com.ut.unilink.util.Log;
 import com.zhichu.nativeplugin.ble.Ble;
 import com.zhichu.nativeplugin.ble.BleDevice;
@@ -105,7 +106,7 @@ public class Unilink {
         mConnectionManager.setBleLink(bleLink);
     }
 
-    public void connect(ScanDevice scanDevice, final int encryptType, final byte[] encryptKey, ConnectListener connectListener,
+    public void connect(ScanDevice scanDevice, final int encryptType, final String encryptKey, ConnectListener connectListener,
                         LockStateListener lockStateListener) {
         addLockStateListener(scanDevice.getAddress(), lockStateListener);
         mConnectionManager.setConnectListener(new IConnectionManager.ConnectListener() {
@@ -237,7 +238,7 @@ public class Unilink {
                     ProductInfo productInfo = new ProductInfo();
                     productInfo.setVersion(data.version);
                     cloudLock.setProductInfo(productInfo);
-                    setEncryptType(address, initLock.getEncryptVersion(), initLock.getSecretKey());
+                    setEncryptType(address, initLock.getEncryptVersion(), Base64.encode(initLock.getSecretKey()));
 
                     callBack.onSuccess(cloudLock);
                 }
@@ -307,19 +308,21 @@ public class Unilink {
         });
     }
 
-    private void setEncryptType(String address, int encryptType, byte[] key) {
+    private void setEncryptType(String address, int encryptType, String key) {
         ClientHelper clientHelper = mConnectionManager.getBleHelper(address);
         if (clientHelper == null) {
             return;
         }
 
+        byte[] keyBytes = Base64.decode(key);
+
         switch (encryptType) {
             case ENCRYPT_TEA:
-                clientHelper.setEncrypt(new TeaEncrypt(key));
+                clientHelper.setEncrypt(new TeaEncrypt(keyBytes));
                 break;
 
             case ENCRYPT_AES:
-                clientHelper.setEncrypt(new AesEncrypt(key));
+                clientHelper.setEncrypt(new AesEncrypt(keyBytes));
                 break;
 
             default:
@@ -344,7 +347,7 @@ public class Unilink {
             return;
         }
 
-        setEncryptType(lock.getAddress(), lock.getEncryptType(), lock.getEntryptKey());
+        setEncryptType(lock.getAddress(), lock.getEncryptType(), lock.getEntryptKeyString());
 
         int deviceNode = 1;
         if (lock.getDeviceId() == DeviceId.GATE_LOCK) {
@@ -393,7 +396,7 @@ public class Unilink {
             return;
         }
 
-        setEncryptType(lock.getAddress(), lock.getEncryptType(), lock.getEntryptKey());
+        setEncryptType(lock.getAddress(), lock.getEncryptType(), lock.getEntryptKeyString());
         final WriteDeviceInfo writeDeviceInfo = new WriteDeviceInfo(lock.getOpenLockPassword(), (byte) 1, new byte[]{1});
         writeDeviceInfo.setClientHelper(clientHelper);
         writeDeviceInfo.sendMsg(new BleCallBack<Void>() {
@@ -436,7 +439,7 @@ public class Unilink {
             return;
         }
 
-        setEncryptType(lock.getAddress(), lock.getEncryptType(), lock.getEntryptKey());
+        setEncryptType(lock.getAddress(), lock.getEncryptType(), lock.getEntryptKeyString());
         final WriteDeviceInfo writeDeviceInfo = new WriteDeviceInfo(lock.getOpenLockPassword(), (byte) 1, new byte[]{0});
         writeDeviceInfo.setClientHelper(clientHelper);
         writeDeviceInfo.sendMsg(new BleCallBack<Void>() {
@@ -479,7 +482,7 @@ public class Unilink {
             return;
         }
 
-        setEncryptType(lock.getAddress(), lock.getEncryptType(), lock.getEntryptKey());
+        setEncryptType(lock.getAddress(), lock.getEncryptType(), lock.getEntryptKeyString());
         final ResetLock resetLock = new ResetLock(lock.getAdminPassword());
         resetLock.setClientHelper(clientHelper);
         resetLock.sendMsg(new BleCallBack<Void>() {
@@ -521,7 +524,7 @@ public class Unilink {
             return;
         }
 
-        setEncryptType(lock.getAddress(), lock.getEncryptType(), lock.getEntryptKey());
+        setEncryptType(lock.getAddress(), lock.getEncryptType(), lock.getEntryptKeyString());
 
         final ReadDeviceInfo readDeviceInfo = new ReadDeviceInfo(lock.getDeviceNum());
         readDeviceInfo.setClientHelper(clientHelper);
@@ -566,7 +569,7 @@ public class Unilink {
             return;
         }
 
-        setEncryptType(lock.getAddress(), lock.getEncryptType(), lock.getEntryptKey());
+        setEncryptType(lock.getAddress(), lock.getEncryptType(), lock.getEntryptKeyString());
         final ReadDeviceMutilInfo readDeviceMutilInfo = new ReadDeviceMutilInfo();
         readDeviceMutilInfo.setClientHelper(clientHelper);
         readDeviceMutilInfo.sendMsg(new BleCallBack<ReadDeviceMutilInfo.Data>() {
@@ -845,7 +848,7 @@ public class Unilink {
         }
 
         ClientHelper clientHelper = mConnectionManager.getBleHelper(lock.getAddress());
-        setEncryptType(lock.getAddress(), lock.getEncryptType(), lock.getEntryptKey());
+        setEncryptType(lock.getAddress(), lock.getEncryptType(), lock.getEntryptKeyString());
         if (clientHelper == null) {
             callback.onFailed(ErrCode.ERR_NO_CONNECT, ErrCode.getMessage(ErrCode.ERR_NO_CONNECT));
             return;
@@ -878,7 +881,7 @@ public class Unilink {
         });
     }
 
-    public void readAutoIncreaseNum(String mac, int encryptType, byte[] encryptKey, final CallBack2<Short> callback) {
+    public void readAutoIncreaseNum(String mac, int encryptType, String encryptKey, final CallBack2<Short> callback) {
 
         ClientHelper clientHelper = mConnectionManager.getBleHelper(mac);
         setEncryptType(mac, encryptType, encryptKey);
@@ -913,7 +916,7 @@ public class Unilink {
         });
     }
 
-    public void readCLoudLockOpenLockRecord(final String mac, final int encryptType, final byte[] encryptKey, int readSerialNum,
+    public void readCLoudLockOpenLockRecord(final String mac, final int encryptType, final String encryptKey, int readSerialNum,
                                             final CallBack2<List<CloudLockOperateRecord>> callback) {
 
         if (!(readSerialNum <= 40 && readSerialNum >= 1)) {
@@ -956,7 +959,7 @@ public class Unilink {
 
     /* -----------------------------------智能门锁------------------------------------------*/
 
-    public void batchUpdateAuthInfos(final String mac, final int encryptType, final byte[] encryptKey, List<AuthInfo> authInfos, final CallBack2<Void> callback) {
+    public void batchUpdateAuthInfos(final String mac, final int encryptType, final String encryptKey, List<AuthInfo> authInfos, final CallBack2<Void> callback) {
 
         ClientHelper clientHelper = mConnectionManager.getBleHelper(mac);
         setEncryptType(mac, encryptType, encryptKey);
@@ -989,7 +992,7 @@ public class Unilink {
         });
     }
 
-    public void deleteKey(final String mac, final int encryptType, final byte[] encryptKey, int keyId, final CallBack2<Void> callback) {
+    public void deleteKey(final String mac, final int encryptType, final String encryptKey, int keyId, final CallBack2<Void> callback) {
 
         ClientHelper clientHelper = mConnectionManager.getBleHelper(mac);
         setEncryptType(mac, encryptType, encryptKey);
@@ -1022,7 +1025,7 @@ public class Unilink {
         });
     }
 
-    public void addAuth(String mac, int encryptType, byte[] encryptKey, AuthInfo authInfo, final CallBack2<Integer> callback) {
+    public void addAuth(String mac, int encryptType, String encryptKey, AuthInfo authInfo, final CallBack2<Integer> callback) {
         operateAuthTable(mac, encryptType, encryptKey, OperateAuthTable.ADD, -1, authInfo, new CallBack2<OperateAuthTable.Data>() {
             @Override
             public void onSuccess(OperateAuthTable.Data data) {
@@ -1040,7 +1043,7 @@ public class Unilink {
         });
     }
 
-    public void deleteAuth(String mac, int encryptType, byte[] encryptKey, int authId, final CallBack2<Void> callback) {
+    public void deleteAuth(String mac, int encryptType, String encryptKey, int authId, final CallBack2<Void> callback) {
         operateAuthTable(mac, encryptType, encryptKey, OperateAuthTable.DELETE, authId, null, new CallBack2<OperateAuthTable.Data>() {
             @Override
             public void onSuccess(OperateAuthTable.Data data) {
@@ -1058,7 +1061,7 @@ public class Unilink {
         });
     }
 
-    public void updateAuth(String mac, int encryptType, byte[] encryptKey, AuthInfo authInfo, final CallBack2<Void> callback) {
+    public void updateAuth(String mac, int encryptType, String encryptKey, AuthInfo authInfo, final CallBack2<Void> callback) {
         operateAuthTable(mac, encryptType, encryptKey, OperateAuthTable.UPDATE, -1, authInfo, new CallBack2<OperateAuthTable.Data>() {
             @Override
             public void onSuccess(OperateAuthTable.Data data) {
@@ -1076,7 +1079,7 @@ public class Unilink {
         });
     }
 
-    public void queryAuthById(String mac, int encryptType, byte[] encryptKey, int authId, final CallBack2<AuthInfo> callback) {
+    public void queryAuthById(String mac, int encryptType, String encryptKey, int authId, final CallBack2<AuthInfo> callback) {
         operateAuthTable(mac, encryptType, encryptKey, OperateAuthTable.QUERY, authId, null, new CallBack2<OperateAuthTable.Data>() {
             @Override
             public void onSuccess(OperateAuthTable.Data data) {
@@ -1094,7 +1097,7 @@ public class Unilink {
         });
     }
 
-    public void queryAllAuth(String mac, int encryptType, byte[] encryptKey, final CallBack2<List<AuthInfo>> callback) {
+    public void queryAllAuth(String mac, int encryptType, String encryptKey, final CallBack2<List<AuthInfo>> callback) {
         operateAuthTable(mac, encryptType, encryptKey, OperateAuthTable.QUERY, 0xFF, null, new CallBack2<OperateAuthTable.Data>() {
             @Override
             public void onSuccess(OperateAuthTable.Data data) {
@@ -1112,7 +1115,7 @@ public class Unilink {
         });
     }
 
-    private void operateAuthTable(final String mac, final int encryptType, final byte[] encryptKey, int operateType, int operateAuthId, AuthInfo operateAuthInfo,
+    private void operateAuthTable(final String mac, final int encryptType, final String encryptKey, int operateType, int operateAuthId, AuthInfo operateAuthInfo,
                                   final CallBack2<OperateAuthTable.Data> callback) {
 
         ClientHelper clientHelper = mConnectionManager.getBleHelper(mac);
@@ -1161,7 +1164,7 @@ public class Unilink {
         });
     }
 
-    public void readAuthCountInfo(final String mac, final int encryptType, final byte[] encryptKey, final CallBack2<List<AuthCountInfo>> callback) {
+    public void readAuthCountInfo(final String mac, final int encryptType, final String encryptKey, final CallBack2<List<AuthCountInfo>> callback) {
         ClientHelper clientHelper = mConnectionManager.getBleHelper(mac);
         setEncryptType(mac, encryptType, encryptKey);
         if (clientHelper == null) {
@@ -1193,7 +1196,7 @@ public class Unilink {
         });
     }
 
-    public void readKeyInfos(final String mac, final int encryptType, final byte[] encryptKey, final CallBack2<List<GateLockKey>> callback) {
+    public void readKeyInfos(final String mac, final int encryptType, final String encryptKey, final CallBack2<List<GateLockKey>> callback) {
         ClientHelper clientHelper = mConnectionManager.getBleHelper(mac);
         setEncryptType(mac, encryptType, encryptKey);
         if (clientHelper == null) {
@@ -1225,7 +1228,7 @@ public class Unilink {
         });
     }
 
-    public void writeKeyInfos(final String mac, final int encryptType, final byte[] encryptKey, List<GateLockKey> gateLockKeys,
+    public void writeKeyInfos(final String mac, final int encryptType, final String encryptKey, List<GateLockKey> gateLockKeys,
                               final CallBack2<Void> callback) {
         ClientHelper clientHelper = mConnectionManager.getBleHelper(mac);
         setEncryptType(mac, encryptType, encryptKey);
@@ -1258,7 +1261,7 @@ public class Unilink {
         });
     }
 
-    public void readGateLockOpenLockRecord(final String mac, final int encryptType, final byte[] encryptKey, int readSerialNum,
+    public void readGateLockOpenLockRecord(final String mac, final int encryptType, final String encryptKey, int readSerialNum,
                                            final CallBack2<List<GateLockOperateRecord>> callback) {
         if (!(readSerialNum <= 40 && readSerialNum >= 1)) {
             if (callback != null) {
@@ -1298,7 +1301,7 @@ public class Unilink {
         });
     }
 
-    public void readTime(final String mac, final int encryptType, final byte[] encryptKey, final CallBack2<Long> callback) {
+    public void readTime(final String mac, final int encryptType, final String encryptKey, final CallBack2<Long> callback) {
         ClientHelper clientHelper = mConnectionManager.getBleHelper(mac);
         setEncryptType(mac, encryptType, encryptKey);
         if (clientHelper == null) {
@@ -1330,7 +1333,7 @@ public class Unilink {
         });
     }
 
-    public void writeTime(final String mac, final int encryptType, final byte[] encryptKey, final CallBack2<Void> callback) {
+    public void writeTime(final String mac, final int encryptType, final String encryptKey, final CallBack2<Void> callback) {
         ClientHelper clientHelper = mConnectionManager.getBleHelper(mac);
         setEncryptType(mac, encryptType, encryptKey);
         if (clientHelper == null) {
@@ -1362,19 +1365,19 @@ public class Unilink {
         });
     }
 
-    public void openGateLock(final String mac, final int encryptType, final byte[] encryptKey, byte[] openLockPassword,
+    public void openGateLock(final String mac, final int encryptType, final String encryptKey, byte[] openLockPassword,
                              final CallBack2<Void> callback) {
         operateLock(mac, encryptType, encryptKey, openLockPassword, OperateLock.OPERATE_OPEN_LOCK, OperateLock.SINGLE_CONTROL,
                 0, GateLockNodeInfo.NODE_AUTH_CONTROL, 1, callback);
     }
 
-    public void openCloudLock(final String mac, final int encryptType, final byte[] encryptKey, byte[] openLockPassword,
+    public void openCloudLock(final String mac, final int encryptType, final String encryptKey, byte[] openLockPassword,
                              final CallBack2<Void> callback) {
         operateLock(mac, encryptType, encryptKey, openLockPassword, OperateLock.OPERATE_OPEN_LOCK, OperateLock.SINGLE_CONTROL,
                 0, CloudLockNodeInfo.NODE_LOCK_CONTROL, 1, callback);
     }
 
-    public void operateLock(final String mac, final int encryptType, final byte[] encryptKey, byte[] openLockPassword, int operateType,
+    public void operateLock(final String mac, final int encryptType, final String encryptKey, byte[] openLockPassword, int operateType,
                             int controlType, int gapTime, int deviceNode, int value, final CallBack2<Void> callback) {
         ClientHelper clientHelper = mConnectionManager.getBleHelper(mac);
         setEncryptType(mac, encryptType, encryptKey);
@@ -1405,6 +1408,16 @@ public class Unilink {
                 }
             }
         });
+    }
+
+    private ClientHelper init(String mac, int encryptType, String encryptKey, CallBack2 callback) {
+        ClientHelper clientHelper = mConnectionManager.getBleHelper(mac);
+        setEncryptType(mac, encryptType, encryptKey);
+        if (clientHelper == null) {
+            callback.onFailed(ErrCode.ERR_NO_CONNECT, ErrCode.getMessage(ErrCode.ERR_NO_CONNECT));
+            return null;
+        }
+        return clientHelper;
     }
 
     /**
@@ -1445,7 +1458,7 @@ public class Unilink {
 
     }
 
-    private void handleErrCode(String mac, int encryptType, byte[] encryptKey, int errCode, String errMessage, final BleCmdBase cmd, final CallBack2 callBack, final BleCallBack bleCallBack) {
+    private void handleErrCode(String mac, int encryptType, String encryptKey, int errCode, String errMessage, final BleCmdBase cmd, final CallBack2 callBack, final BleCallBack bleCallBack) {
         if (errCode == ErrCode.ERR_REPEAT_CODE) {
             Log.i("autuIncreaseNum error，start read autoIncreaseNum");
             readAutoIncreaseNum(mac, encryptType, encryptKey, new CallBack2<Short>() {

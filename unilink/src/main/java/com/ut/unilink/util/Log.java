@@ -64,6 +64,24 @@ public class Log {
         return result;
     }
 
+    public static byte[] getBytes(String data) {
+
+        data = data.replaceAll(" ", "");
+
+        if (data.length() % 2 != 0) {
+            data = "0" + data;
+        }
+
+        int length = data.length() / 2;
+        byte[] result = new byte[length];
+
+        for (int i=0, j=0; i<length; i++, j+=2) {
+            String item = data.substring(j, j+2);
+            result[i] = (byte) Integer.parseInt(item, 16);
+        }
+        return result;
+    }
+
     public static String toUnsignedHex(byte[] data) {
        return toUnsignedHex(data, " ");
     }

@@ -172,7 +172,7 @@ public class UnilinkManager {
      * @param connectListener 监听连接结果
      * @param lockStateListener 连接成功后，监听云锁的状态信息
      */
-    public void connect(ScanDevice scanDevice, final int encryptType, final byte[] encryptKey, ConnectListener connectListener,
+    public void connect(ScanDevice scanDevice, final int encryptType, final String encryptKey, ConnectListener connectListener,
                         LockStateListener lockStateListener) {
         mUnilink.connect(scanDevice, encryptType, encryptKey, connectListener, lockStateListener);
     }
@@ -484,7 +484,7 @@ public class UnilinkManager {
      * @param readSerialNum 读取序号，取值范围1-40，序号为1代表读取最新的5条记录，序号越大读取的记录越旧
      * @param callback 操作回调接口
      */
-    public void readCLoudLockOpenLockRecord(String mac, int encryptType, byte[] encryptKey, int readSerialNum,
+    public void readCLoudLockOpenLockRecord(String mac, int encryptType, String encryptKey, int readSerialNum,
                                             final CallBack2<List<CloudLockOperateRecord>> callback) {
         mUnilink.readCLoudLockOpenLockRecord(mac, encryptType, encryptKey, readSerialNum, callback);
     }
@@ -497,7 +497,7 @@ public class UnilinkManager {
      * @param authInfos 要修改的授权信息
      * @param callback 操作回调接口
      */
-    public void batchUpdateAuthInfos(String mac, int encryptType, byte[] encryptKey, List<AuthInfo> authInfos,
+    public void batchUpdateAuthInfos(String mac, int encryptType, String encryptKey, List<AuthInfo> authInfos,
                                      final CallBack2<Void> callback) {
         mUnilink.batchUpdateAuthInfos(mac, encryptType, encryptKey, authInfos, callback);
     }
@@ -510,7 +510,7 @@ public class UnilinkManager {
      * @param keyId 要删除的钥匙ID
      * @param callback 操作回调接口
      */
-    public void deleteKey(String mac, int encryptType, byte[] encryptKey, int keyId, final CallBack2<Void> callback) {
+    public void deleteKey(String mac, int encryptType, String encryptKey, int keyId, final CallBack2<Void> callback) {
         mUnilink.deleteKey(mac, encryptType, encryptKey, keyId, callback);
     }
 
@@ -522,7 +522,7 @@ public class UnilinkManager {
      * @param authInfo 要添加的授权信息
      * @param callback 操作回调接口
      */
-    public void addAuth(String mac, int encryptType, byte[] encryptKey, AuthInfo authInfo, final CallBack2<Integer> callback) {
+    public void addAuth(String mac, int encryptType, String encryptKey, AuthInfo authInfo, final CallBack2<Integer> callback) {
         mUnilink.addAuth(mac, encryptType, encryptKey, authInfo, callback);
     }
 
@@ -534,7 +534,7 @@ public class UnilinkManager {
      * @param authId 要删除的授权ID
      * @param callback 操作回调接口
      */
-    public void deleteAuth(String mac, int encryptType, byte[] encryptKey, int authId, final CallBack2<Void> callback) {
+    public void deleteAuth(String mac, int encryptType, String encryptKey, int authId, final CallBack2<Void> callback) {
         mUnilink.deleteAuth(mac, encryptType, encryptKey, authId, callback);
     }
 
@@ -546,7 +546,7 @@ public class UnilinkManager {
      * @param authInfo 要修改的授权信息
      * @param callback 操作回调接口
      */
-    public void updateAuth(String mac, int encryptType, byte[] encryptKey, AuthInfo authInfo, final CallBack2<Void> callback) {
+    public void updateAuth(String mac, int encryptType, String encryptKey, AuthInfo authInfo, final CallBack2<Void> callback) {
         mUnilink.updateAuth(mac, encryptType, encryptKey, authInfo, callback);
     }
 
@@ -558,7 +558,7 @@ public class UnilinkManager {
      * @param authId 要查询的授权ID
      * @param callback 操作回调接口
      */
-    public void queryAuthById(String mac, int encryptType, byte[] encryptKey, int authId, final CallBack2<AuthInfo> callback) {
+    public void queryAuthById(String mac, int encryptType, String encryptKey, int authId, final CallBack2<AuthInfo> callback) {
         mUnilink.queryAuthById(mac, encryptType, encryptKey, authId, callback);
     }
 
@@ -569,7 +569,7 @@ public class UnilinkManager {
      * @param encryptKey 加密密钥
      * @param callback 操作回调接口
      */
-    public void queryAllAuth(String mac, int encryptType, byte[] encryptKey, final CallBack2<List<AuthInfo>> callback) {
+    public void queryAllAuth(String mac, int encryptType, String encryptKey, final CallBack2<List<AuthInfo>> callback) {
         mUnilink.queryAllAuth(mac, encryptType, encryptKey, callback);
     }
 
@@ -580,7 +580,7 @@ public class UnilinkManager {
      * @param encryptKey 加密密钥
      * @param callback 操作回调接口
      */
-    public void readAuthCountInfo(String mac, int encryptType, byte[] encryptKey, final CallBack2<List<AuthCountInfo>> callback) {
+    public void readAuthCountInfo(String mac, int encryptType, String encryptKey, final CallBack2<List<AuthCountInfo>> callback) {
         mUnilink.readAuthCountInfo(mac, encryptType, encryptKey, callback);
     }
 
@@ -591,7 +591,7 @@ public class UnilinkManager {
      * @param encryptKey 加密密钥
      * @param callback 操作回调接口
      */
-    public void readKeyInfos(String mac, int encryptType, byte[] encryptKey, final CallBack2<List<GateLockKey>> callback) {
+    public void readKeyInfos(String mac, int encryptType, String encryptKey, final CallBack2<List<GateLockKey>> callback) {
         mUnilink.readKeyInfos(mac, encryptType, encryptKey, callback);
     }
 
@@ -603,7 +603,7 @@ public class UnilinkManager {
      * @param gateLockKeys 要写入的钥匙管理配置表
      * @param callback 操作回调接口
      */
-    public void writeKeyInfos(String mac, int encryptType, byte[] encryptKey, List<GateLockKey> gateLockKeys,
+    public void writeKeyInfos(String mac, int encryptType, String encryptKey, List<GateLockKey> gateLockKeys,
                               final CallBack2<Void> callback) {
         mUnilink.writeKeyInfos(mac, encryptType, encryptKey, gateLockKeys, callback);
     }
@@ -616,7 +616,7 @@ public class UnilinkManager {
      * @param readSerialNum 读取序号，取值范围1-40，序号为1代表读取最新的5条记录，序号越大读取的记录越旧
      * @param callback 操作回调接口
      */
-    public void readGateLockOpenLockRecord(String mac, int encryptType, byte[] encryptKey, int readSerialNum,
+    public void readGateLockOpenLockRecord(String mac, int encryptType, String encryptKey, int readSerialNum,
                                            final CallBack2<List<GateLockOperateRecord>> callback) {
         mUnilink.readGateLockOpenLockRecord(mac, encryptType, encryptKey, readSerialNum, callback);
     }
@@ -628,7 +628,7 @@ public class UnilinkManager {
      * @param encryptKey 加密密钥
      * @param callback 操作回调接口
      */
-    public void readTime(String mac, int encryptType, byte[] encryptKey, final CallBack2<Long> callback) {
+    public void readTime(String mac, int encryptType, String encryptKey, final CallBack2<Long> callback) {
         mUnilink.readTime(mac, encryptType, encryptKey, callback);
     }
 
@@ -639,7 +639,7 @@ public class UnilinkManager {
      * @param encryptKey 加密密钥
      * @param callback 操作回调接口
      */
-    public void writeTime(String mac, int encryptType, byte[] encryptKey, final CallBack2<Void> callback) {
+    public void writeTime(String mac, int encryptType, String encryptKey, final CallBack2<Void> callback) {
         mUnilink.writeTime(mac, encryptType, encryptKey, callback);
     }
 
@@ -651,7 +651,7 @@ public class UnilinkManager {
      * @param openLockPassword 开锁密码
      * @param callback 操作回调接口
      */
-    public void openGateLock(final String mac, final int encryptType, final byte[] encryptKey, byte[] openLockPassword,
+    public void openGateLock(final String mac, final int encryptType, final String encryptKey, byte[] openLockPassword,
                              final CallBack2<Void> callback) {
         mUnilink.openGateLock(mac, encryptType, encryptKey, openLockPassword, callback);
     }
@@ -664,7 +664,7 @@ public class UnilinkManager {
      * @param openLockPassword 开锁密码
      * @param callback 操作回调接口
      */
-    public void openCloudLock(final String mac, final int encryptType, final byte[] encryptKey, byte[] openLockPassword,
+    public void openCloudLock(final String mac, final int encryptType, final String encryptKey, byte[] openLockPassword,
                               final CallBack2<Void> callback) {
         mUnilink.openCloudLock(mac, encryptType, encryptKey, openLockPassword, callback);
     }
