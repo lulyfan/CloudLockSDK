@@ -46,6 +46,10 @@ public class Ble {
         return BleHolder.instance;
     }
 
+    public ScanCallback getScanCallback() {
+        return scanCallback;
+    }
+
     /**
      * 设置蓝牙状态监听器
      *

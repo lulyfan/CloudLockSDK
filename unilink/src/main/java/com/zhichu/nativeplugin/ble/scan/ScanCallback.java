@@ -17,6 +17,7 @@ import com.zhichu.nativeplugin.ble.BleDevice;
 import com.zhichu.nativeplugin.ble.UUIDHelper;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,10 @@ public class ScanCallback extends android.bluetooth.le.ScanCallback implements I
     public ScanCallback initBluetoothAdapter(BluetoothAdapter bluetoothAdapter) {
         this.bluetoothAdapter = bluetoothAdapter;
         return this;
+    }
+
+    public Collection<BleDevice> getScanDevice() {
+        return bleDeviceFoundMap.values();
     }
 
 

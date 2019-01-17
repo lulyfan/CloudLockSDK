@@ -138,11 +138,9 @@ public class UnilinkManager {
 
     /**
      * 停止搜索
-     *
-     * @return -1 蓝牙不支持  10 蓝牙没有打开  0 停止搜索执行成功
      */
-    public int stopScan() {
-        return Ble.get().stopScan();
+    public void stopScan() {
+        mUnilink.stopScan();
     }
 
     /**

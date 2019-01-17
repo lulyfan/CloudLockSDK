@@ -16,6 +16,7 @@ import com.ut.unilink.cloudLock.ScanListener;
 import com.ut.unilink.cloudLock.ScanDevice;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_BLUETOOTH = 1;
     private static final int REQUEST_PERMISSION = 2;
     private UnilinkManager unilinkManager;
+    private List<ScanDevice> scanDevices = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +81,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClick(View view) {
+
+        if (view.getId() == R.id.stopScan) {
+            UnilinkManager.getInstance(this).stopScan();
+            return;
+        }
+
         String sVendorId = et_vendorId.getText().toString();
         String sDeviceType = et_deviceType.getText().toString();
 
@@ -101,16 +109,24 @@ public class MainActivity extends AppCompatActivity {
 
         deviceAdapter.setScanDevices(null);
         deviceAdapter.notifyDataSetChanged();
+        scanDevices.clear();
         int result = unilinkManager.scan(new ScanListener() {
             @Override
-            public void onScan(ScanDevice scanDevice, List<ScanDevice> scanDevices) {
+            public void onScan(ScanDevice scanDevice) {
+                scanDevices.add(scanDevice);
                 deviceAdapter.setScanDevices(scanDevices);
                 deviceAdapter.notifyDataSetChanged();
 
             }
 
             @Override
-            public void onFinish() {
+            public void onScanTimeout() {
+                progressBar.setVisibility(View.GONE);
+                showMsg("未发现指定设备");
+            }
+
+            @Override
+            public void onFinish(List<ScanDevice> scanDevices) {
                 progressBar.setVisibility(View.GONE);
             }
         }, 5, vendorId, deviceType);

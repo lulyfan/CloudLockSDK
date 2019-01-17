@@ -53,6 +53,7 @@ import com.zhichu.nativeplugin.ble.scan.ScanCallback;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +67,8 @@ public class Unilink {
     private UTBleLink utBleLink;
     private JinouxBleLink jinouxBleLink;
     private Map<Integer, BaseBleLink> bleLinkMap = new HashMap<>();
+    private ScanListener mScanListener;
+    private List<String> scanMacs = new ArrayList<>();
 
     private static final int ENCRYPT_TEA = 0;
     private static final int ENCRYPT_AES = 1;
@@ -166,37 +169,42 @@ public class Unilink {
      * @return -1 蓝牙不支持  10 蓝牙没有打开  0 搜索执行成功
      */
     public int scan(final ScanListener scanListener, int scanTime, byte[] vendorId, byte[] deviceType) {
-        ScanCallback filterScanCallback = new ScanCallback(new IScanCallback() {
+        mScanListener = scanListener;
+        scanMacs.clear();
+
+        ScanCallback scanCallback = new ScanCallback(new IScanCallback() {
             @Override
             public void onDeviceFound(BleDevice bleDevice, List<BleDevice> result) {
-                if (scanListener != null) {
-                    ScanDevice currentScanDevice = null; //本次扫描出的设备
+                if (mScanListener != null) {
+                    ScanDevice scanDevice = new ScanDevice();
+                    scanDevice.setBleDevice(bleDevice);
+                    scanDevice.setAddress(bleDevice.getDeviceUUID());
+
+                    if (!scanMacs.contains(scanDevice.getAddress())) {
+                        scanMacs.add(scanDevice.getAddress());
+                        mScanListener.onScan(scanDevice);
+                    }
+                }
+            }
+
+            @Override
+            public void onScanFinish(List<BleDevice> result) {
+                if (mScanListener != null) {
                     List<ScanDevice> scanDevices = new ArrayList<>();
                     for (BleDevice device : result) {
                         ScanDevice scanDevice = new ScanDevice();
                         scanDevice.setBleDevice(device);
                         scanDevice.setAddress(device.getDeviceUUID());
                         scanDevices.add(scanDevice);
-
-                        if (bleDevice.getDeviceUUID().equals(scanDevice.getAddress())) {
-                            currentScanDevice = scanDevice;
-                        }
                     }
-                    scanListener.onScan(currentScanDevice, scanDevices);
-                }
-            }
-
-            @Override
-            public void onScanFinish(List<BleDevice> result) {
-                if (scanListener != null) {
-                    scanListener.onFinish();
+                    mScanListener.onFinish(scanDevices);
                 }
             }
 
             @Override
             public void onScanTimeout() {
-                if (scanListener != null) {
-                    scanListener.onFinish();
+                if (mScanListener != null) {
+                    mScanListener.onScanTimeout();
                 }
             }
         });
@@ -205,11 +213,33 @@ public class Unilink {
         cloudLockFilter.setVendorId(vendorId);
         cloudLockFilter.setDeviceType(deviceType);
 
-        filterScanCallback.addFilter(cloudLockFilter);
-        filterScanCallback.addFilter(new GateLockFilter());
-        filterScanCallback.scanSecond(scanTime);
+        scanCallback.addFilter(cloudLockFilter);
+        scanCallback.addFilter(new GateLockFilter());
+        scanCallback.scanSecond(scanTime);
 
-        return Ble.get().scan(filterScanCallback);
+        return Ble.get().scan(scanCallback);
+    }
+
+    public void stopScan() {
+        Ble.get().stopScan();
+
+        if (mScanListener != null) {
+            ScanCallback scanCallback = Ble.get().getScanCallback();
+
+            if (scanCallback != null) {
+                Collection<BleDevice> bleDevices = scanCallback.getScanDevice();
+                List<ScanDevice> scanDevices = new ArrayList<>();
+                for(BleDevice bleDevice : bleDevices) {
+                    ScanDevice scanDevice = new ScanDevice();
+                    scanDevice.setBleDevice(bleDevice);
+                    scanDevice.setAddress(bleDevice.getDeviceUUID());
+                    scanDevices.add(scanDevice);
+                }
+
+                mScanListener.onFinish(scanDevices);
+            }
+
+        }
     }
 
     /**
@@ -1378,7 +1408,7 @@ public class Unilink {
     }
 
     public void openCloudLock(final String mac, final int encryptType, final String encryptKey, byte[] openLockPassword,
-                             final CallBack2<Void> callback) {
+                              final CallBack2<Void> callback) {
         operateLock(mac, encryptType, encryptKey, openLockPassword, OperateLock.OPERATE_OPEN_LOCK, OperateLock.SINGLE_CONTROL,
                 0, CloudLockNodeInfo.NODE_LOCK_CONTROL, 1, callback);
     }
