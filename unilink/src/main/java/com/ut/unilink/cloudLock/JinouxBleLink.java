@@ -21,7 +21,6 @@ public class JinouxBleLink extends BaseBleLink {
 
     private BluetoothLeService bluetoothLeService;
     private String address;
-    private ConnectListener connectListener;
     private Context context;
     private static final String TAG = "jinoux";
     private Handler handler;

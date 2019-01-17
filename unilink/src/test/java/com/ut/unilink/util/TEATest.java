@@ -26,8 +26,7 @@ public class TEATest {
     @Test
     public void encrypt() {
         byte[] data = getBytes("22 10 c0 96 e8 6b 4a 3a 00 01 01 00");
-        byte[] key = new byte[]{0x14, 0x18, (byte) 0x82, 0x02, (byte) 0xE9, 0x6B, (byte) 0x88, (byte) 0xAD,
-                (byte) 0xFF, 0x0C, 0x11, 0x79, (byte) 0xAF, 0x39, 0x5B, (byte) 0xEE};
+        byte[] key = getBytes("78 72 8b b8 69 00 70 80");
         TeaEncrypt teaEncrypt = new TeaEncrypt(key);
         System.out.println(Log.toUnsignedHex(teaEncrypt.encrypt(data), ""));
     }
@@ -35,8 +34,8 @@ public class TEATest {
     @Test
     public void decrypt() {
 //        byte[] data = getBytes("5df7a30900c6f2d0917666a5ecb922837761ce3015d8c8cc988c931fc1587087");
-        byte[] data = getBytes("220a14d4708c666400070101");
-        byte[] key = getBytes("96d1babb9d5c9f98");
+        byte[] data = getBytes("28b32cbb98bfc7f8d660a67add3eab5912345678");
+        byte[] key = getBytes("78 72 8b b8 69 00 70 80");
 
 //        byte[] key = new byte[]{0x14, 0x18, (byte) 0x82, 0x02, (byte) 0xE9, 0x6B, (byte) 0x88, (byte) 0xAD,
 //                (byte) 0xFF, 0x0C, 0x11, 0x79, (byte) 0xAF, 0x39, 0x5B, (byte) 0xEE};

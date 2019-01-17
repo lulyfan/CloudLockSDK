@@ -61,7 +61,9 @@ public class UTBleLink extends BaseBleLink {
      * @param connectListener 连接结果监听器
      */
     @Override
-    public void connect(String address, final ConnectListener connectListener) {
+    public void connect(String address, ConnectListener connectListener) {
+        this.connectListener = connectListener;
+
         Ble.get().connect(address, new IConnectCallback() {
             @Override
             public void onConnectSuccess(BleDevice bleDevice) {
@@ -91,11 +93,11 @@ public class UTBleLink extends BaseBleLink {
                                     @Override
                                     public void onNotify(UUID serviceUUID, UUID characteristicUUID) {
                                         Log.i("registerNotify success");
-                                        if (connectListener != null) {
+                                        if (UTBleLink.this.connectListener != null) {
                                             handler.post(new Runnable() {
                                                 @Override
                                                 public void run() {
-                                                    connectListener.onConnect();
+                                                    UTBleLink.this.connectListener.onConnect();
                                                 }
                                             });
                                         }
@@ -112,7 +114,7 @@ public class UTBleLink extends BaseBleLink {
 
             @Override
             public void onDisconnect(BleDevice bleDevice, boolean isActive) {
-                handleDisconnect(bleDevice, CODE_DISCONNECT, "", connectListener);
+                handleDisconnect(bleDevice, CODE_DISCONNECT, "");
             }
 
             @Override
@@ -122,12 +124,12 @@ public class UTBleLink extends BaseBleLink {
             @Override
             public void onFailure(BleDevice bleDevice, int code, String message) {
 
-                handleDisconnect(bleDevice, code, message, connectListener);
+                handleDisconnect(bleDevice, code, message);
             }
         });
     }
 
-    private void handleDisconnect(BleDevice bleDevice, final int code, final String message, final ConnectListener connectListener) {
+    private void handleDisconnect(BleDevice bleDevice, final int code, final String message) {
 
         Log.i("disconnect mac:" + bleDevice.getDeviceUUID() + " code:" + code + " msg:" + message);
         String deviceUUID = bleDevice.getDeviceUUID();

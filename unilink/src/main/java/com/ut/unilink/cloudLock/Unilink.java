@@ -92,6 +92,12 @@ public class Unilink {
         return mConnectionManager.isConnect(address);
     }
 
+    public void setConnectListener(ConnectListener connectListener) {
+        if (bleLink != null) {
+            bleLink.setConnectListener(connectListener);
+        }
+    }
+
     /**
      * 连接指定蓝牙设备
      *

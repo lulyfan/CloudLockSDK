@@ -117,6 +117,14 @@ public class UnilinkManager {
     }
 
     /**
+     * 设置连接监听器
+     * @param connectListener
+     */
+    public void setConnectListener(ConnectListener connectListener) {
+        mUnilink.setConnectListener(connectListener);
+    }
+
+    /**
      * 搜索云锁设备
      *
      * @param scanListener 搜索结果监听器
