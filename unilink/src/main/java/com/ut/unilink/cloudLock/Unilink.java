@@ -1339,7 +1339,7 @@ public class Unilink {
         });
     }
 
-    public void writeTime(final String mac, final int encryptType, final String encryptKey, final CallBack2<Void> callback) {
+    public void writeTime(final String mac, final int encryptType, final String encryptKey, long time, final CallBack2<Void> callback) {
         ClientHelper clientHelper = mConnectionManager.getBleHelper(mac);
         setEncryptType(mac, encryptType, encryptKey);
         if (clientHelper == null) {
@@ -1347,7 +1347,7 @@ public class Unilink {
             return;
         }
 
-        final WriteTime writeTime = new WriteTime();
+        final WriteTime writeTime = new WriteTime(time);
         writeTime.setClientHelper(clientHelper);
         writeTime.sendMsg(new BleCallBack<Void>() {
             @Override

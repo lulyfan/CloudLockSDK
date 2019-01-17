@@ -647,8 +647,8 @@ public class UnilinkManager {
      * @param encryptKey 加密密钥
      * @param callback 操作回调接口
      */
-    public void writeTime(String mac, int encryptType, String encryptKey, final CallBack2<Void> callback) {
-        mUnilink.writeTime(mac, encryptType, encryptKey, callback);
+    public void writeTime(String mac, int encryptType, String encryptKey, long time, final CallBack2<Void> callback) {
+        mUnilink.writeTime(mac, encryptType, encryptKey, time, callback);
     }
 
     /**

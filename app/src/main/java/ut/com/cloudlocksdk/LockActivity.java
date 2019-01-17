@@ -730,7 +730,7 @@ public class LockActivity extends AppCompatActivity {
                 }
 
                 unilinkManager.writeTime(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKeyString(),
-                        new CallBack2<Void>() {
+                        new Date().getTime(), new CallBack2<Void>() {
                             @Override
                             public void onSuccess(Void data) {
                                 showMsg("writeTime success");

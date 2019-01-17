@@ -9,10 +9,16 @@ import java.util.Calendar;
 public class WriteTime extends BleCmdBase<Void> {
 
     private static final int CODE = 0x2E;
+    private long time;
+
+    public WriteTime(long time) {
+        this.time = time;
+    }
 
     @Override
     public BleMsg build() {
         Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(time);
         int year = calendar.get(Calendar.YEAR) - 2000;
         int mouth = calendar.get(Calendar.MONTH) + 1;
         int day = calendar.get(Calendar.DAY_OF_MONTH);
