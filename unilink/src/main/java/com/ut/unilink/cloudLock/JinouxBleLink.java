@@ -83,7 +83,12 @@ public class JinouxBleLink extends BaseBleLink {
     }
 
     private void handleDisconnect(final int code) {
-        bluetoothLeService.disconnect(-1);
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                bluetoothLeService.BluetoothGattClose();
+            }
+        });
 
         if (mConnectionManager != null) {
             mConnectionManager.onDisConnect(address, code);

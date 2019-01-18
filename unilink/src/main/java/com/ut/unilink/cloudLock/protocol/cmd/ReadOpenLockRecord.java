@@ -35,7 +35,7 @@ public class ReadOpenLockRecord extends BleCmdBase<ReadOpenLockRecord.Data> {
 
         for (int i=0; i<recordCount; i++) {
             CloudLockOperateRecord record = new CloudLockOperateRecord();
-            buffer.get(record.getOperateTime());
+            buffer.get(record.getOperateTimeBytes());
             record.setMotorControl(buffer.get());
             record.setDoorState(buffer.get());
             data.operateRecords.add(record);

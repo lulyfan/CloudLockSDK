@@ -19,6 +19,7 @@ import com.ut.unilink.cloudLock.LockStateListener;
 import com.ut.unilink.cloudLock.ScanDevice;
 import com.ut.unilink.cloudLock.protocol.data.AuthCountInfo;
 import com.ut.unilink.cloudLock.protocol.data.AuthInfo;
+import com.ut.unilink.cloudLock.protocol.data.CloudLockOperateRecord;
 import com.ut.unilink.cloudLock.protocol.data.GateLockKey;
 import com.ut.unilink.cloudLock.protocol.data.GateLockOperateRecord;
 import com.ut.unilink.cloudLock.protocol.data.LockState;
@@ -813,6 +814,34 @@ public class LockActivity extends AppCompatActivity {
                         });
                 break;
 
+            case R.id.readCloudLockOpenRecord:
+                if (mCloudLock == null) {
+                    mCloudLock = readLock();
+                }
+
+                if (mCloudLock == null) {
+                    showMsg("获取锁信息失败，请先初始化锁");
+                    return;
+                }
+
+                unilinkManager.readCLoudLockOpenLockRecord(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKeyString(),
+                        1, new CallBack2<List<CloudLockOperateRecord>>() {
+                            @Override
+                            public void onSuccess(List<CloudLockOperateRecord> data) {
+                                String str = "";
+                                for (CloudLockOperateRecord record : data) {
+                                    str += record.toString() + "\n\n";
+                                }
+                                MsgDialogFragment.show(LockActivity.this, "读取开锁记录成功", str);
+                            }
+
+                            @Override
+                            public void onFailed(int errCode, String errMsg) {
+                                showMsg("read openLockRecord failed " + errMsg);
+                            }
+                        });
+                break;
+
             case R.id.readGateLockOpenRecord:
                 if (mCloudLock == null) {
                     mCloudLock = readLock();
@@ -836,7 +865,7 @@ public class LockActivity extends AppCompatActivity {
 
                             @Override
                             public void onFailed(int errCode, String errMsg) {
-                                showMsg("openLockRecord failed " + errMsg);
+                                showMsg("read openLockRecord failed " + errMsg);
                             }
                         });
                 break;

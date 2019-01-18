@@ -150,9 +150,13 @@ public class UTBleLink extends BaseBleLink {
     }
 
     @Override
-    public void close(String deviceUUID) {
-
-        Ble.get().disconnect(deviceUUID);
+    public void close(final String deviceUUID) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                Ble.get().disconnect(deviceUUID);
+            }
+        });
     }
 
     @Override
