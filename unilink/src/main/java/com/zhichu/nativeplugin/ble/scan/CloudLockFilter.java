@@ -36,8 +36,6 @@ public class CloudLockFilter extends DeviceFilter {
     @Override
     public boolean onFilter(BluetoothDevice device, int rssi, byte[] scanRecord) {
 
-        System.out.println(Log.toUnsignedHex(scanRecord, " "));
-
         byte[] cloudLockRecord = getClockLockRecord(scanRecord);
         if (cloudLockRecord == null) {
             return false;

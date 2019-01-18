@@ -51,6 +51,11 @@ public class UnilinkManager {
      * 蓝牙未打开
      */
     public static final int BLE_NOT_OPEN = 10;
+
+    /**
+     * 蓝牙已打开
+     */
+    public static final int BLE_OPENED = 12;
     /**
      * 搜索执行成功
      */
@@ -84,9 +89,9 @@ public class UnilinkManager {
 
     /**
      * 请求蓝牙搜索所需的定位权限。请求权限结果需要实现{@link Activity#onRequestPermissionsResult(int, String[], int[])}
-     *
      * @param activity
      * @param requestCode
+     * @return 已有权限返回true,否则false
      */
     public void requestPermission(Activity activity, int requestCode) {
         if (!checkPermission()) {
@@ -96,11 +101,26 @@ public class UnilinkManager {
         }
     }
 
-    private boolean checkPermission() {
+    public boolean checkPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
                 ContextCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 检查状态, 返回true表示蓝牙已开启和权限已具备
+     * @return
+     */
+    public boolean checkState() {
+        if (!Ble.get().isEnabled()) {
+            return false;
+        }
+
+        if (!checkPermission()) {
             return false;
         }
         return true;
