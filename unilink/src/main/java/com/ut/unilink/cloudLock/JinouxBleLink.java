@@ -25,6 +25,7 @@ public class JinouxBleLink extends BaseBleLink {
     private static final String TAG = "jinoux";
     private Handler handler;
     private boolean isBind;
+    private boolean isConnect;
 
     public static final int CODE_JINOUX_BLE_DISCONNECTED = -101;
     public static final int CODE_JINOUX_BLE_CONNECT_TIMEOUT = -102;
@@ -42,6 +43,7 @@ public class JinouxBleLink extends BaseBleLink {
     public void connect(final String address, ConnectListener connectListener) {
         this.address = address;
         this.connectListener = connectListener;
+        isConnect = false;
         handler.post(new Runnable() {
             @Override
             public void run() {
@@ -105,6 +107,8 @@ public class JinouxBleLink extends BaseBleLink {
     }
 
     private void handleConnect() {
+        isConnect = true;
+
         if (mConnectionManager != null) {
             mConnectionManager.onConnect(address);
         }
@@ -171,6 +175,15 @@ public class JinouxBleLink extends BaseBleLink {
 
                 case BlueToothParams.ACTION_GATT_CONNECTED:
                     Log.i( TAG, "bluetooth connected");
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (!isConnect) {
+                                Log.i(TAG, "read charac timeout");
+                                close(address);
+                            }
+                        }
+                    }, 3000);
                     break;
 
                 case BlueToothParams.ACTION_GATT_DATARECEIVED:
