@@ -57,76 +57,84 @@ public class UTBleLink extends BaseBleLink {
 
     /**
      * 连接指定云锁设备
-     * @param address 云锁设备MAC地址，可以从搜索获取的云锁设备{@link ScanDevice#getAddress()}得到
+     *
+     * @param address         云锁设备MAC地址，可以从搜索获取的云锁设备{@link ScanDevice#getAddress()}得到
      * @param connectListener 连接结果监听器
      */
     @Override
-    public void connect(String address, ConnectListener connectListener) {
+    public void connect(final String address, ConnectListener connectListener) {
         this.connectListener = connectListener;
 
-        Ble.get().connect(address, new IConnectCallback() {
+        handler.post(new Runnable() {
             @Override
-            public void onConnectSuccess(BleDevice bleDevice) {
-
-                final String deviceUUID = bleDevice.getDeviceUUID();
-
-                if (mConnectionManager != null) {
-                    mConnectionManager.onConnect(deviceUUID);
-                }
-
-                Ble.get().addBleNotifyDataCallback(deviceUUID, new IBleNotifyDataCallback() {
+            public void run() {
+                Ble.get().connect(address, new IConnectCallback() {
                     @Override
-                    public void onNotify(BleDevice bleDevice, byte[] data, UUID serviceUUID, UUID characteristicUUID) {
+                    public void onConnectSuccess(final BleDevice bleDevice) {
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                handleConnectSuccess(bleDevice);
+                            }
+                        });
 
-//                        Log.i("notify data:" + Log.toUnsignedHex(data));
-                        if (mConnectionManager != null) {
-                            mConnectionManager.onReceive(bleDevice.getDeviceUUID(), data);
-                        }
+                    }
+
+                    @Override
+                    public void onDisconnect(BleDevice bleDevice, boolean isActive) {
+                        handleDisconnect(bleDevice, CODE_DISCONNECT, "");
+                    }
+
+                    @Override
+                    public void onConnect(BleDevice bleDevice) {
+                    }
+
+                    @Override
+                    public void onFailure(BleDevice bleDevice, int code, String message) {
+                        handleDisconnect(bleDevice, code, message);
                     }
                 });
-
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        Ble.get().registerNotify(deviceUUID, UUID_SERVICE, UUID_NOTIFY_CHARACTERISTIC,
-                                new INotifyCallback() {
-                                    @Override
-                                    public void onNotify(UUID serviceUUID, UUID characteristicUUID) {
-                                        Log.i("registerNotify success");
-                                        if (UTBleLink.this.connectListener != null) {
-                                            handler.post(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    UTBleLink.this.connectListener.onConnect();
-                                                }
-                                            });
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onFailure(BleDevice bleDevice, int code, String message) {
-                                        Log.i("registerNotify failed ------ code:" + code + " msg:" + message);
-                                    }
-                                });
-                    }
-                }, 0);
-            }
-
-            @Override
-            public void onDisconnect(BleDevice bleDevice, boolean isActive) {
-                handleDisconnect(bleDevice, CODE_DISCONNECT, "");
-            }
-
-            @Override
-            public void onConnect(BleDevice bleDevice) {
-            }
-
-            @Override
-            public void onFailure(BleDevice bleDevice, int code, String message) {
-
-                handleDisconnect(bleDevice, code, message);
             }
         });
+
+    }
+
+    private void handleConnectSuccess(BleDevice bleDevice) {
+        final String deviceUUID = bleDevice.getDeviceUUID();
+        if (mConnectionManager != null) {
+            mConnectionManager.onConnect(deviceUUID);
+        }
+
+        Ble.get().addBleNotifyDataCallback(deviceUUID, new IBleNotifyDataCallback() {
+            @Override
+            public void onNotify(BleDevice bleDevice, byte[] data, UUID serviceUUID, UUID characteristicUUID) {
+
+                if (mConnectionManager != null) {
+                    mConnectionManager.onReceive(bleDevice.getDeviceUUID(), data);
+                }
+            }
+        });
+
+
+        Ble.get().registerNotify(deviceUUID, UUID_SERVICE, UUID_NOTIFY_CHARACTERISTIC, new INotifyCallback() {
+                    @Override
+                    public void onNotify(UUID serviceUUID, UUID characteristicUUID) {
+                        Log.i("registerNotify success");
+                        if (UTBleLink.this.connectListener != null) {
+                            handler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    UTBleLink.this.connectListener.onConnect();
+                                }
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(BleDevice bleDevice, int code, String message) {
+                        Log.i("registerNotify failed ------ code:" + code + " msg:" + message);
+                    }
+                });
     }
 
     private void handleDisconnect(BleDevice bleDevice, final int code, final String message) {
