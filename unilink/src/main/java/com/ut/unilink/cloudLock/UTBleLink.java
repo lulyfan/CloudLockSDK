@@ -163,6 +163,9 @@ public class UTBleLink extends BaseBleLink {
             @Override
             public void run() {
                 Ble.get().disconnect(deviceUUID);
+                if (connectListener != null) {
+                    connectListener.onDisconnect(CODE_DISCONNECT, null);
+                }
             }
         });
     }
