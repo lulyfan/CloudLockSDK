@@ -1,12 +1,19 @@
 package com.ut.unilink.jobluetooth;
 
+import com.ut.unilink.util.Log;
+
 import java.nio.ByteBuffer;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 
 public class DataAssemble {
 
     public static final byte[] BYTE_HEAD = {(byte) 0xA5, 0x5A};
     private ByteBuffer buffer = ByteBuffer.allocate(255);
+//    private ByteBuffer tempBuffer = ByteBuffer.allocate(1024);   //用来暂存数据
+//    private Executor executor = Executors.newSingleThreadExecutor();
+//    private Object lock = new Object();
 
     private static final int STATE_HEAD1 = 0;    //正在解析头1
     private static final int STATE_HEAD2 = 1;    //正在解析头2
@@ -20,6 +27,10 @@ public class DataAssemble {
 
     public interface ReceiveCallback {
         void onReceiveSuccess(byte[] data);
+    }
+
+    public DataAssemble() {
+//        run();
     }
 
     public void setReceiveCallback(ReceiveCallback mReceiveCallback) {
@@ -36,8 +47,42 @@ public class DataAssemble {
         buffer.clear();
     }
 
+//    public void receiveData(byte[] data) {
+//        synchronized (lock) {
+//            tempBuffer.put(data);
+//            lock.notify();
+//        }
+//    }
+//
+//    public void run() {
+//        executor.execute(new Runnable() {
+//            @Override
+//            public void run() {
+//                while (true) {
+//                    synchronized (lock) {
+//                        while (tempBuffer.position() <= 0) {
+//                            try {
+//                                lock.wait();
+//                            } catch (InterruptedException e) {
+//                                e.printStackTrace();
+//                            }
+//                        }
+//
+//                        tempBuffer.flip();
+//                        byte[] data = new byte[tempBuffer.remaining()];
+//                        tempBuffer.get(data);
+//                        tempBuffer.clear();
+////                        Log.i("debug data:" + Log.toUnsignedHex(data));
+//                        assembleData(data);
+//                    }
+//                }
+//            }
+//        });
+//    }
 
-    public void receiveData(final byte[] data) {
+    public void assembleData(final byte[] data) {
+
+//        Log.i("assembleData:" + Log.toUnsignedHex(data));
 
         int pos = 0;
 
@@ -106,7 +151,7 @@ public class DataAssemble {
 
         byte[] a = new byte[data.length - pos];
         System.arraycopy(data, pos, a, 0, a.length);
-        receiveData(a);
+        assembleData(a);
     }
 
     private static class Holder {

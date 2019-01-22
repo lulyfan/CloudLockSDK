@@ -42,6 +42,13 @@ public class JinouxBleLink extends BaseBleLink {
     public void connect(final String address, ConnectListener connectListener) {
         this.address = address;
         this.connectListener = connectListener;
+        DataAssemble.get().setReceiveCallback(new DataAssemble.ReceiveCallback() {
+            @Override
+            public void onReceiveSuccess(byte[] data) {
+                Log.i(TAG, "receive data:" + Log.toUnsignedHex(data));
+                mConnectionManager.onReceive(address, data);
+            }
+        });
         handler.post(new Runnable() {
             @Override
             public void run() {
@@ -125,19 +132,11 @@ public class JinouxBleLink extends BaseBleLink {
                 }
             });
         }
-
-        DataAssemble.get().setReceiveCallback(new DataAssemble.ReceiveCallback() {
-            @Override
-            public void onReceiveSuccess(byte[] data) {
-                Log.i(TAG, "receive data:" + Log.toUnsignedHex(data));
-                mConnectionManager.onReceive(address, data);
-            }
-        });
     }
 
     private void handleReceiveData(byte[] data) {
         if (mConnectionManager != null) {
-            DataAssemble.get().receiveData(data);
+            DataAssemble.get().assembleData(data);
         }
     }
 
@@ -182,8 +181,8 @@ public class JinouxBleLink extends BaseBleLink {
                     break;
 
                 case BlueToothParams.ACTION_GATT_DATARECEIVED:
-
                     byte[] data = intent.getByteArrayExtra(BluetoothLeService.DATA_NAME);
+                    Log.i("receive data:" + Log.toUnsignedHex(data));
                     handleReceiveData(data);
                     break;
 

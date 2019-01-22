@@ -16,6 +16,7 @@ public class BleMsg {
     private byte[] content;
     private IEncrypt mEntrypt;
     private int requestID;
+    private boolean isNeedResponse = true;                   //是否需要回复
 
     private int encryptType = ENCRYPT_TYPE_DYNAMIC;          //默认使用动态加密
 
@@ -75,6 +76,14 @@ public class BleMsg {
         msg.content = content;
 
         return msg;
+    }
+
+    public void setNeedResponse(boolean needResponse) {
+        isNeedResponse = needResponse;
+    }
+
+    public boolean isNeedResponse() {
+        return isNeedResponse;
     }
 
     public void setRequestID(int requestID) {

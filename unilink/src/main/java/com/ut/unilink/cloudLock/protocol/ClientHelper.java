@@ -2,6 +2,7 @@ package com.ut.unilink.cloudLock.protocol;
 
 import com.ut.unilink.cloudLock.protocol.cmd.ErrCode;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -13,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ClientHelper implements ClientBase.ReceiveListener {
     private ClientBase client;
-    private Map<Integer, SendedTask> sendedTaskMap = new HashMap<>();
+    private Map<Integer, SendedTask> sendedTaskMap = Collections.synchronizedMap(new HashMap<Integer, SendedTask>());
     private ScheduledExecutorService executorService;
     private IEncrypt mEncrypt;
     private static AtomicInteger value = new AtomicInteger();
@@ -71,21 +72,24 @@ public class ClientHelper implements ClientBase.ReceiveListener {
         value.incrementAndGet();
         msg.setRequestID(requestID);
 
-        ScheduledFuture scheduledFuture = executorService.schedule(new Runnable() {
-            @Override
-            public void run() {
-                SendedTask task = sendedTaskMap.remove(requestID);
+        ScheduledFuture scheduledFuture = null;
+        if (msg.isNeedResponse()) {
+            scheduledFuture = executorService.schedule(new Runnable() {
+                @Override
+                public void run() {
+                    SendedTask task = sendedTaskMap.remove(requestID);
 
-                if (task != null) {
-                    ResponseListener listener = task.responseListener;
-                    BleMsg sendMsg = task.sendmsg;
+                    if (task != null) {
+                        ResponseListener listener = task.responseListener;
+                        BleMsg sendMsg = task.sendmsg;
 
-                    if (listener != null) {
-                        listener.timeout(sendMsg);
+                        if (listener != null) {
+                            listener.timeout(sendMsg);
+                        }
                     }
                 }
-            }
-        }, TIMEOUT, TimeUnit.MILLISECONDS);
+            }, TIMEOUT, TimeUnit.MILLISECONDS);
+        }
 
         SendedTask sendedTask = new SendedTask(msg, scheduledFuture);
         sendedTask.setResponseListener(listener);
@@ -150,9 +154,13 @@ public class ClientHelper implements ClientBase.ReceiveListener {
         while (iterator.hasNext()) {
             Map.Entry<Integer, SendedTask> entry = (Map.Entry<Integer, SendedTask>) iterator.next();
             SendedTask sendedTask = entry.getValue();
-            sendedTask.scheduledFuture.cancel(true);
-            sendedTask.scheduledFuture = null;
-            sendedTask.responseListener.onNAk(sendedTask.sendmsg, ErrCode.ERR_CONNECT_INTERRUPT);
+            if (sendedTask.scheduledFuture != null) {
+                sendedTask.scheduledFuture.cancel(true);
+                sendedTask.scheduledFuture = null;
+            }
+            if (sendedTask.responseListener != null) {
+                sendedTask.responseListener.onNAk(sendedTask.sendmsg, ErrCode.ERR_CONNECT_INTERRUPT);
+            }
         }
 
         if (client != null) {
@@ -174,7 +182,7 @@ public class ClientHelper implements ClientBase.ReceiveListener {
     @Override
     public void onReceive(byte[] msg) {
 
-        int requestID = msg[msg.length - 1];
+        int requestID = msg[msg.length - 1] & 0xFF;
         byte isEncrypt = msg[msg.length - 2];
         byte encryptType = msg[msg.length - 3];
 

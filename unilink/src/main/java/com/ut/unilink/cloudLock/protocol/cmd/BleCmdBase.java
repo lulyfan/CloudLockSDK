@@ -77,6 +77,10 @@ public abstract class BleCmdBase<T> {
 
     }
 
+    public void sendMsg() {
+        wrapSend(null);
+    }
+
     public void syncSendMsg(final BleCallBack<T> callBack) {
 
         if (clientHelper == null) {

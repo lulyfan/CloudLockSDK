@@ -176,6 +176,7 @@ public class LockActivity extends AppCompatActivity {
         public void onConnect() {
             LogInFile.write("connect success time:" + TimeRecord.end("connect") + "ms");
             lock.setImageResource(R.drawable.lock_connect);
+            openGateLock();
         }
 
         @Override
@@ -193,6 +194,30 @@ public class LockActivity extends AppCompatActivity {
         }
     };
 
+    private void openGateLock() {
+        if (mCloudLock == null) {
+            mCloudLock = readLock();
+        }
+
+        if (mCloudLock == null) {
+            showMsg("获取锁信息失败，请先初始化锁");
+            return;
+        }
+
+        unilinkManager.openGateLock(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKeyString(),
+                mCloudLock.getOpenLockPassword(), new CallBack2<Void>() {
+                    @Override
+                    public void onSuccess(Void data) {
+                        showMsg("门锁打开成功");
+                    }
+
+                    @Override
+                    public void onFailed(int errCode, String errMsg) {
+                        showMsg("门锁打开失败：" + errMsg);
+                    }
+                });
+    }
+
     public void onClick(View view) {
         switch (view.getId()) {
 
@@ -206,6 +231,10 @@ public class LockActivity extends AppCompatActivity {
                 TimeRecord.start("connect");
 
                 if (mCloudLock == null) {
+                    mCloudLock = readLock();
+                }
+
+                if (mCloudLock == null) {
                     unilinkManager.connect(device, connectListener);
                 }
                 else {
@@ -216,6 +245,7 @@ public class LockActivity extends AppCompatActivity {
 
             case R.id.disconnect:
                 unilinkManager.close(address);
+                power.setText("");
                 break;
 
             case R.id.init:
@@ -1145,27 +1175,7 @@ public class LockActivity extends AppCompatActivity {
                 break;
 
             case R.id.openGateLock:
-                if (mCloudLock == null) {
-                    mCloudLock = readLock();
-                }
-
-                if (mCloudLock == null) {
-                    showMsg("获取锁信息失败，请先初始化锁");
-                    return;
-                }
-
-                unilinkManager.openGateLock(mCloudLock.getAddress(), mCloudLock.getEncryptType(), mCloudLock.getEntryptKeyString(),
-                        mCloudLock.getOpenLockPassword(), new CallBack2<Void>() {
-                            @Override
-                            public void onSuccess(Void data) {
-                                showMsg("门锁打开成功");
-                            }
-
-                            @Override
-                            public void onFailed(int errCode, String errMsg) {
-                                showMsg("门锁打开失败：" + errMsg);
-                            }
-                        });
+                openGateLock();
                 break;
 
                 default:

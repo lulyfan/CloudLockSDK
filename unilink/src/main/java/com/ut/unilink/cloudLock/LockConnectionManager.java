@@ -5,7 +5,10 @@ import android.os.Looper;
 
 import com.ut.unilink.cloudLock.protocol.BleClient;
 import com.ut.unilink.cloudLock.protocol.BleMsg;
+import com.ut.unilink.cloudLock.protocol.ClientBase;
 import com.ut.unilink.cloudLock.protocol.ClientHelper;
+import com.ut.unilink.cloudLock.protocol.cmd.BleCallBack;
+import com.ut.unilink.cloudLock.protocol.cmd.StateResponse;
 import com.ut.unilink.cloudLock.protocol.data.CloudLockState;
 import com.ut.unilink.cloudLock.protocol.data.GateLockState;
 import com.ut.unilink.cloudLock.protocol.data.LockState;
@@ -48,6 +51,7 @@ public class LockConnectionManager implements IConnectionManager {
 
             BleClient bleClient = new BleClient(deviceUUID, this);
             clientHelper = new ClientHelper(bleClient);
+            final ClientHelper finalClientHelper = clientHelper;
             clientHelper.setReceiveListener(new ClientHelper.ReceiveListener() {
                 @Override
                 public void onReceive(BleMsg msg) {
@@ -66,6 +70,9 @@ public class LockConnectionManager implements IConnectionManager {
                                 }
                             });
                         }
+
+                        handleState(finalClientHelper);
+
                     } else if (msg.getCode() == CMD_DEVICE_CLOSE) {
                         Log.i("从设备断开连接");
                         bleLink.close(deviceUUID);
@@ -98,8 +105,9 @@ public class LockConnectionManager implements IConnectionManager {
         ClientHelper clientHelper = mBleHelperMap.get(address);
         if (clientHelper != null) {
             byte[] wrapData = frameHandler.handleReceive(data);
-            if (wrapData != null) {
-                clientHelper.getClient().receive(wrapData);
+            ClientBase client = clientHelper.getClient();
+            if (wrapData != null && client != null) {
+                client.receive(wrapData);
             }
         }
     }
@@ -149,6 +157,12 @@ public class LockConnectionManager implements IConnectionManager {
 
         lockState.getLockState(msg.getContent());
         return lockState;
+    }
+
+    private void handleState(ClientHelper clientHelper) {
+        StateResponse stateResponse = new StateResponse();
+        stateResponse.setClientHelper(clientHelper);
+        stateResponse.sendMsg();
     }
 
     void addLockStateListener(String address, LockStateListener lockStateListener) {
