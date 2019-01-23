@@ -34,8 +34,8 @@ public class TEATest {
     @Test
     public void decrypt() {
 //        byte[] data = getBytes("5df7a30900c6f2d0917666a5ecb922837761ce3015d8c8cc988c931fc1587087");
-        byte[] data = getBytes("28b32cbb98bfc7f8d660a67add3eab5912345678");
-        byte[] key = getBytes("78 72 8b b8 69 00 70 80");
+        byte[] data = getBytes("08 c0 0b ce f4 09 bb d3 9d 31 c2 07 3b");
+        byte[] key = getBytes("15 0a 2e db 97 0e 45 94");
 
 //        byte[] key = new byte[]{0x14, 0x18, (byte) 0x82, 0x02, (byte) 0xE9, 0x6B, (byte) 0x88, (byte) 0xAD,
 //                (byte) 0xFF, 0x0C, 0x11, 0x79, (byte) 0xAF, 0x39, 0x5B, (byte) 0xEE};

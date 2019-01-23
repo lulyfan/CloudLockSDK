@@ -45,7 +45,7 @@ public class JinouxBleLink extends BaseBleLink {
         DataAssemble.get().setReceiveCallback(new DataAssemble.ReceiveCallback() {
             @Override
             public void onReceiveSuccess(byte[] data) {
-                Log.i(TAG, "receive data:" + Log.toUnsignedHex(data));
+                Log.i(TAG, "jinoux receive data:" + Log.toUnsignedHex(data));
                 mConnectionManager.onReceive(address, data);
             }
         });

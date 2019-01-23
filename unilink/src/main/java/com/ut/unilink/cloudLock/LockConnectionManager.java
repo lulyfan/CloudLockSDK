@@ -71,7 +71,7 @@ public class LockConnectionManager implements IConnectionManager {
                             });
                         }
 
-                        handleState(finalClientHelper);
+//                        handleState(finalClientHelper);
 
                     } else if (msg.getCode() == CMD_DEVICE_CLOSE) {
                         Log.i("从设备断开连接");

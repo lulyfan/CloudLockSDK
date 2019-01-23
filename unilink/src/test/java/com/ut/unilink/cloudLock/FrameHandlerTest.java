@@ -60,19 +60,23 @@ public class FrameHandlerTest {
 
     @Test
     public void handleReceive() {
+        FrameHandler.setFrameSize(20);
         FrameHandler frameHandler = new FrameHandler();
 
-        byte[] d1 = getBytes("a55a08c001290eb9a27fcceb3b9cbe");
+        byte[] d1 = getBytes("a5 5a 20 80 0a 7d 3d 8f 9f eb e7 e3 4b f9 b3 ef d6 6a d3 d0");
+        byte[] d2 = getBytes("a5 5a 20 81 0a 7a 84 7c 76 53 b9 d0 41 9c b4 5c 26 45 a6 35");
+        byte[] d3 = getBytes("a5 5a 20 83 0a fa f2 c9 81 6a bd d3 03");
 //        byte[] d2 = getBytes("a55a20c1017d1e8dc0cac3139e579806e10dc8d5");
 //        byte[] d4 = getBytes("a55a20c2014d69a5848576450c");
 
         System.out.println(toUnsignedHexString(frameHandler.handleReceive(d1)));
-//        System.out.println(toUnsignedHexString(frameHandler.handleReceive(d2)));
-//        System.out.println(toUnsignedHexString(frameHandler.handleReceive(d4)));
-
+        System.out.println(toUnsignedHexString(frameHandler.handleReceive(d2)));
+        System.out.println(toUnsignedHexString(frameHandler.handleReceive(d3)));
     }
 
     private byte[] getBytes(String data) {
+        data = data.replaceAll(" ", "");
+
         int length = data.length() / 2;
         byte[] result = new byte[length];
 
@@ -81,7 +85,7 @@ public class FrameHandlerTest {
             result[i] = (byte) Integer.parseInt(item, 16);
         }
 
-        System.out.println(Log.toUnsignedHex(result, ""));
+//        System.out.println(Log.toUnsignedHex(result, ""));
         return result;
     }
 }
