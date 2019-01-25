@@ -182,7 +182,7 @@ public class JinouxBleLink extends BaseBleLink {
 
                 case BlueToothParams.ACTION_GATT_DATARECEIVED:
                     byte[] data = intent.getByteArrayExtra(BluetoothLeService.DATA_NAME);
-                    Log.i("receive data:" + Log.toUnsignedHex(data));
+                    Log.i("jinoux receive data:" + Log.toUnsignedHex(data));
                     handleReceiveData(data);
                     break;
 

@@ -81,83 +81,62 @@ public class DataAssemble {
 //    }
 
     public void assembleData(final byte[] data) {
-
-//        Log.i("assembleData:" + Log.toUnsignedHex(data));
-
         int pos = 0;
 
-        switch (state) {
-            case STATE_HEAD1:
-                if (data.length < 1) {
-                    return;
-                }
+        while (pos < data.length) {
+            switch (state) {
+                case STATE_HEAD1:
+                    if (data[pos] == BYTE_HEAD[0]) {
+                        buffer.put((byte) 0xA5);
+                        state = STATE_HEAD2;
+                    }
+                    pos++;
+                    break;
 
-                if (data[0] == BYTE_HEAD[0]) {
-                    buffer.put((byte) 0xA5);
-                    state = STATE_HEAD2;
-                }
-                pos ++;
-                break;
+                case STATE_HEAD2:
+                    if (data[pos] == BYTE_HEAD[1]) {
+                        buffer.put((byte) 0x5A);
+                        state = STATE_LENGTH;
 
-            case STATE_HEAD2:
-                if (data.length < 1) {
-                    return;
-                }
+                    } else if (data[pos] == BYTE_HEAD[0]) {
+                        buffer.clear();
+                        buffer.put((byte) 0xA5);
+                        state = STATE_HEAD2;
 
-                if (data[0] == BYTE_HEAD[1]) {
-                    buffer.put((byte) 0x5A);
-                    state = STATE_LENGTH;
-
-                 } else if (data[0] == BYTE_HEAD[0]) {
-                    buffer.clear();
-                    buffer.put((byte) 0xA5);
-                    state = STATE_HEAD2;
-
-                } else {
-                    reset();
-                }
-                pos ++;
-                break;
-
-            case STATE_LENGTH:
-                if (data.length < 1) {
-                    return;
-                }
-
-                int dataLength = data[0] & 0xFF;   //获取正文长度
-                buffer.put((byte) dataLength);
-                needMsgLength = 4 + dataLength;
-                state = STATE_BODY;
-                pos ++;
-                break;
-
-            case STATE_BODY:
-                int currentReadLength = Math.min(needMsgLength, data.length);
-                buffer.put(data, 0, currentReadLength);
-                needMsgLength -= currentReadLength;
-                pos += currentReadLength;
-
-                if (needMsgLength == 0) {
-                    if (mReceiveCallback != null) {
-                        byte[] b = new byte[buffer.position()];
-                        buffer.flip();
-                        buffer.get(b);
-                        mReceiveCallback.onReceiveSuccess(b);
+                    } else {
                         reset();
                     }
-                }
-                break;
+                    pos++;
+                    break;
 
-            default:
+                case STATE_LENGTH:
+                    int dataLength = data[pos] & 0xFF;   //获取正文长度
+                    buffer.put((byte) dataLength);
+                    needMsgLength = 4 + dataLength;
+                    state = STATE_BODY;
+                    pos++;
+                    break;
+
+                case STATE_BODY:
+                    int currentReadLength = Math.min(needMsgLength, data.length - pos);
+                    buffer.put(data, pos, currentReadLength);
+                    needMsgLength -= currentReadLength;
+                    pos += currentReadLength;
+
+                    if (needMsgLength == 0) {
+                        if (mReceiveCallback != null) {
+                            byte[] b = new byte[buffer.position()];
+                            buffer.flip();
+                            buffer.get(b);
+                            mReceiveCallback.onReceiveSuccess(b);
+                            reset();
+                        }
+                    }
+                    break;
+
+                default:
+            }
         }
-
-        if (data.length - pos == 0) {
-            return;
-        }
-
-        byte[] a = new byte[data.length - pos];
-        System.arraycopy(data, pos, a, 0, a.length);
-        assembleData(a);
     }
 
     private static class Holder {
