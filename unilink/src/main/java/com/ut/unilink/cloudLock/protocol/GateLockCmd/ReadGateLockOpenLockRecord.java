@@ -38,6 +38,7 @@ public class ReadGateLockOpenLockRecord extends BleCmdBase<ReadGateLockOpenLockR
         for (int i=0; i<recordCount; i++) {
             GateLockOperateRecord record = new GateLockOperateRecord();
             record.setKeyId(buffer.get() & 0xFF);
+            record.setKeyType(buffer.get() & 0xFF);
             buffer.get(record.getOperateTimeBytes());
             data.records.add(record);
         }

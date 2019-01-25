@@ -189,8 +189,12 @@ public class LockActivity extends AppCompatActivity {
     private LockStateListener lockStateListener = new LockStateListener() {
         @Override
         public void onState(final LockState state) {
-            power.setText("电量:" + state.getElect());
-
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    power.setText("电量:" + state.getElect());
+                }
+            });
         }
     };
 
