@@ -2,6 +2,7 @@ package ut.com.cloudlocksdk;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -40,6 +41,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 
 public class LockActivity extends AppCompatActivity {
@@ -51,6 +54,9 @@ public class LockActivity extends AppCompatActivity {
     private CloudLock mCloudLock;
     private TextView power;
     private ScanDevice device;
+    private Toast toast;
+    private Handler handler = new Handler();
+    private Executor executor = Executors.newSingleThreadExecutor();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,11 +68,11 @@ public class LockActivity extends AppCompatActivity {
         address = device.getAddress();
 
         String info = "Mac:" + device.getAddress() + "\n" +
-                        "厂商标识:" + toUnsignedHexString(device.getVendorId()) + "\n" +
-                        "设备类型:" + toUnsignedHexString(device.getDeviceType()) + "\n" +
-                        "激活状态:" + (device.isActive() ? "已激活" : "未激活");
+                "厂商标识:" + toUnsignedHexString(device.getVendorId()) + "\n" +
+                "设备类型:" + toUnsignedHexString(device.getDeviceType()) + "\n" +
+                "激活状态:" + (device.isActive() ? "已激活" : "未激活");
         lockInfo.setText(info);
-
+        toast = Toast.makeText(this, "", Toast.LENGTH_SHORT);
         unilinkManager = UnilinkManager.getInstance(this);
     }
 
@@ -84,7 +90,7 @@ public class LockActivity extends AppCompatActivity {
 
     private String toUnsignedHexString(byte[] data) {
         String result = "0x";
-        for(int i=0; i<data.length; i++) {
+        for (int i = 0; i < data.length; i++) {
             result += (String.format("%02x", data[i] & 0xFF));
         }
 
@@ -120,7 +126,7 @@ public class LockActivity extends AppCompatActivity {
 
     private CloudLock readLock() {
         try {
-            FileInputStream fileInputStream  = new FileInputStream("/sdcard/lockInfo.txt");
+            FileInputStream fileInputStream = new FileInputStream("/sdcard/lockInfo.txt");
             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
             LockInfo lockInfo = (LockInfo) objectInputStream.readObject();
 
@@ -222,6 +228,67 @@ public class LockActivity extends AppCompatActivity {
                 });
     }
 
+    private void readDeviceNodeInfo(final boolean isLoop) {
+        if (mCloudLock == null) {
+            mCloudLock = readLock();
+        }
+
+        if (mCloudLock == null) {
+            showMsg("获取锁信息失败，请先初始化锁");
+            return;
+        }
+
+        LogInFile.write("\nstart readDeviceNodeInfo...");
+        TimeRecord.start("readDeviceNodeInfo");
+
+        if (isLoop) {
+
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    while (true) {
+
+                        unilinkManager.getDeviceInfo(mCloudLock, new CallBack() {
+                            @Override
+                            public void onSuccess(CloudLock cloudLock) {
+                                LogInFile.write("readDeviceNodeInfo success time:" + TimeRecord.end("readDeviceNodeInfo") + "ms");
+                                showMsg("getDeviceInfo:" + Log.toUnsignedHex(cloudLock.getDeviceInfo(mCloudLock.getDeviceNum()), ""));
+                            }
+
+                            @Override
+                            public void onFailed(int errCode, String errMsg) {
+                                showMsg("getDeviceInfo failed:" + errMsg);
+                            }
+                        });
+
+                        try {
+                            Thread.sleep(20);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            });
+
+        } else
+
+        {
+            unilinkManager.getDeviceInfo(mCloudLock, new CallBack() {
+                @Override
+                public void onSuccess(CloudLock cloudLock) {
+                    LogInFile.write("readDeviceNodeInfo success time:" + TimeRecord.end("readDeviceNodeInfo") + "ms");
+                    showMsg("getDeviceInfo:" + Log.toUnsignedHex(cloudLock.getDeviceInfo(mCloudLock.getDeviceNum()), ""));
+                }
+
+                @Override
+                public void onFailed(int errCode, String errMsg) {
+                    showMsg("getDeviceInfo failed:" + errMsg);
+                }
+            });
+        }
+
+    }
+
     public void onClick(View view) {
         switch (view.getId()) {
 
@@ -240,8 +307,7 @@ public class LockActivity extends AppCompatActivity {
 
                 if (mCloudLock == null) {
                     unilinkManager.connect(device, connectListener);
-                }
-                else {
+                } else {
                     unilinkManager.connect(device, mCloudLock.getEncryptType(), mCloudLock.getEntryptKeyString(),
                             connectListener, lockStateListener);
                 }
@@ -594,7 +660,7 @@ public class LockActivity extends AppCompatActivity {
                 }
 
                 showMsg("随机生成厂商标识和设备类型 " + "vendorId:" + Log.toUnsignedHex(vendorId, "")
-                 + " deviceType:" + Log.toUnsignedHex(deviceType, ""));
+                        + " deviceType:" + Log.toUnsignedHex(deviceType, ""));
 
                 LogInFile.write("\nstart writeVendorId...");
                 TimeRecord.start("writeVendorId");
@@ -642,30 +708,7 @@ public class LockActivity extends AppCompatActivity {
                 break;
 
             case R.id.readInfo:
-                if (mCloudLock == null) {
-                    mCloudLock = readLock();
-                }
-
-                if (mCloudLock == null) {
-                    showMsg("获取锁信息失败，请先初始化锁");
-                    return;
-                }
-
-                LogInFile.write("\nstart readDeviceNodeInfo...");
-                TimeRecord.start("readDeviceNodeInfo");
-
-                unilinkManager.getDeviceInfo(mCloudLock, new CallBack() {
-                    @Override
-                    public void onSuccess(CloudLock cloudLock) {
-                        LogInFile.write("readDeviceNodeInfo success time:" + TimeRecord.end("readDeviceNodeInfo") + "ms");
-                        showMsg("getDeviceInfo:" + Log.toUnsignedHex(cloudLock.getDeviceInfo(mCloudLock.getDeviceNum()), ""));
-                    }
-
-                    @Override
-                    public void onFailed(int errCode, String errMsg) {
-                        showMsg("getDeviceInfo failed:" + errMsg);
-                    }
-                });
+                readDeviceNodeInfo(false);
                 break;
 
             case R.id.readMutilInfo:
@@ -1120,7 +1163,7 @@ public class LockActivity extends AppCompatActivity {
 
                             @Override
                             public void onFailed(int errCode, String errMsg) {
-                                showMsg("deleteAuth failed "+ errMsg);
+                                showMsg("deleteAuth failed " + errMsg);
                             }
                         });
                 break;
@@ -1182,7 +1225,11 @@ public class LockActivity extends AppCompatActivity {
                 openGateLock();
                 break;
 
-                default:
+            case R.id.test:
+                readDeviceNodeInfo(true);
+                break;
+
+            default:
 
         }
     }
@@ -1194,7 +1241,8 @@ public class LockActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(LockActivity.this, msg, Toast.LENGTH_SHORT).show();
+                toast.setText(msg);
+                toast.show();
             }
         });
     }

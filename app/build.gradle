@@ -2,6 +2,14 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 27
+    signingConfigs {
+        realeaseSign {
+            keyAlias 'utwl'
+            keyPassword 'utwl2018'
+            storeFile file('D:/signkey/utwl.jks')
+            storePassword 'utwl2018'
+        }
+    }
     defaultConfig {
         applicationId "ut.com.cloudlocksdk"
         minSdkVersion 19
@@ -12,10 +20,12 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.realeaseSign
         }
     }
+
 }
 
 dependencies {

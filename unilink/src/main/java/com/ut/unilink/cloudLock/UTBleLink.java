@@ -189,16 +189,20 @@ public class UTBleLink extends BaseBleLink {
     private void write(String deviceUUID, byte[] data) throws InterruptedException {
 
         synchronized (sendLock) {
-            while (isSending) {
-                sendLock.wait();
+            if (isSending) {
+                sendLock.wait(1000);
+            }
+
+            if (isSending) {
+                Log.i("UTBleLink", "发送包超时-----------------------------------------------------");
             }
 
             isSending = true;
-            Log.i("start write:" + Log.toUnsignedHex(data));
+            Log.i("UTBleLink", "start write:" + Log.toUnsignedHex(data));
             Ble.get().write(deviceUUID, UUID_SERVICE, UUID_WRITE_CHARACTERISTIC, data, new IWriteCallback() {
                 @Override
                 public void onWrite(UUID serviceUUID, UUID characteristicUUID) {
-                    Log.i("ble write success");
+                    Log.i("UTBleLink", "ble write success");
                     handleSendEnd();
 
 //                    handler.postDelayed(() -> {}, 20);
@@ -206,7 +210,7 @@ public class UTBleLink extends BaseBleLink {
 
                 @Override
                 public void onFailure(BleDevice bleDevice, int code, String message) {
-                    Log.i("ble write failed");
+                    Log.i("UTBleLink", "ble write failed");
                     handleSendEnd();
                 }
             });

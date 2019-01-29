@@ -446,6 +446,17 @@
                 app:layout_constraintStart_toStartOf="@id/openCloudLock"
                 app:layout_constraintTop_toBottomOf="@id/openCloudLock" />
 
+            <Button
+                android:id="@+id/test"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:onClick="onClick"
+                android:text="压力测试"
+                app:layout_constraintEnd_toEndOf="@id/openGateLock"
+                app:layout_constraintStart_toStartOf="@id/openGateLock"
+                app:layout_constraintTop_toBottomOf="@id/openGateLock" />
+
         </android.support.constraint.ConstraintLayout>
     </ScrollView>
 
