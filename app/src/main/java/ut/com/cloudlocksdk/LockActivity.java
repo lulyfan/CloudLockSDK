@@ -181,13 +181,14 @@ public class LockActivity extends AppCompatActivity {
         @Override
         public void onConnect() {
             LogInFile.write("connect success time:" + TimeRecord.end("connect") + "ms");
+            Log.i("onConnect---------");
             lock.setImageResource(R.drawable.lock_connect);
 //            openGateLock();
         }
 
         @Override
         public void onDisconnect(int code, String message) {
-            Log.i("onDisconnect--------");
+            Log.i("onDisconnect--------code:" + code + "\tmsg:" + message);
             lock.setImageResource(R.drawable.lock_disconnect);
         }
     };

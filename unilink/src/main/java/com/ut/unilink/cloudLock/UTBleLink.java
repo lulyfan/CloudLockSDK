@@ -82,7 +82,7 @@ public class UTBleLink extends BaseBleLink {
 
                     @Override
                     public void onDisconnect(BleDevice bleDevice, boolean isActive) {
-                        handleDisconnect(bleDevice, CODE_DISCONNECT, "");
+                        handleDisconnect(bleDevice, CODE_DISCONNECT, null);
                     }
 
                     @Override
@@ -118,24 +118,24 @@ public class UTBleLink extends BaseBleLink {
 
 
         Ble.get().registerNotify(deviceUUID, UUID_SERVICE, UUID_NOTIFY_CHARACTERISTIC, new INotifyCallback() {
-                    @Override
-                    public void onNotify(UUID serviceUUID, UUID characteristicUUID) {
-                        Log.i("registerNotify success");
-                        if (UTBleLink.this.connectListener != null) {
-                            handler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    UTBleLink.this.connectListener.onConnect();
-                                }
-                            });
+            @Override
+            public void onNotify(UUID serviceUUID, UUID characteristicUUID) {
+                Log.i("registerNotify success");
+                if (UTBleLink.this.connectListener != null) {
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            UTBleLink.this.connectListener.onConnect();
                         }
-                    }
+                    });
+                }
+            }
 
-                    @Override
-                    public void onFailure(BleDevice bleDevice, int code, String message) {
-                        Log.i("registerNotify failed ------ code:" + code + " msg:" + message);
-                    }
-                });
+            @Override
+            public void onFailure(BleDevice bleDevice, int code, String message) {
+                Log.i("registerNotify failed ------ code:" + code + " msg:" + message);
+            }
+        });
     }
 
     private void handleDisconnect(BleDevice bleDevice, final int code, final String message) {
@@ -148,14 +148,15 @@ public class UTBleLink extends BaseBleLink {
             mConnectionManager.onDisConnect(deviceUUID, code);
         }
 
-        if (connectListener != null) {
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (connectListener != null) {
                     connectListener.onDisconnect(code, message);
+                    connectListener = null;
                 }
-            });
-        }
+            }
+        });
     }
 
     @Override
@@ -166,6 +167,7 @@ public class UTBleLink extends BaseBleLink {
                 Ble.get().disconnect(deviceUUID);
                 if (connectListener != null) {
                     connectListener.onDisconnect(CODE_DISCONNECT, null);
+                    connectListener = null;
                 }
             }
         });

@@ -81,17 +81,17 @@ public class JinouxBleLink extends BaseBleLink {
 
         switch (code) {
             case CODE_JINOUX_BLE_DISCONNECTED:
-                msg =  "jinoux bluetooth disconnected";
+                msg = "jinoux bluetooth disconnected";
                 break;
 
             case CODE_JINOUX_BLE_CONNECT_TIMEOUT:
-                msg =  "jinoux bluetooth connect timeout";
+                msg = "jinoux bluetooth connect timeout";
                 break;
 
             case CODE_JINOUX_BLE_CLOSE:
                 msg = "jinoux bluetooth close";
                 break;
-                default:
+            default:
         }
         return msg;
     }
@@ -108,14 +108,16 @@ public class JinouxBleLink extends BaseBleLink {
             mConnectionManager.onDisConnect(address, code);
         }
 
-        if (connectListener != null) {
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (connectListener != null) {
                     connectListener.onDisconnect(code, getCodeMsg(code));
+                    connectListener = null;
                 }
-            });
-        }
+            }
+        });
     }
 
     private void handleConnect() {
@@ -124,14 +126,15 @@ public class JinouxBleLink extends BaseBleLink {
             mConnectionManager.onConnect(address);
         }
 
-        if (connectListener != null) {
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (connectListener != null) {
                     connectListener.onConnect();
                 }
-            });
-        }
+            }
+        });
     }
 
     private void handleReceiveData(byte[] data) {
@@ -143,7 +146,7 @@ public class JinouxBleLink extends BaseBleLink {
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            bluetoothLeService = ((BluetoothLeService.LocalBinder)service).getService();
+            bluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
             bluetoothLeService.initialize();
             isBind = true;
         }
@@ -177,7 +180,7 @@ public class JinouxBleLink extends BaseBleLink {
                     break;
 
                 case BlueToothParams.ACTION_GATT_CONNECTED:
-                    Log.i( TAG, "bluetooth connected");
+                    Log.i(TAG, "bluetooth connected");
                     break;
 
                 case BlueToothParams.ACTION_GATT_DATARECEIVED:
