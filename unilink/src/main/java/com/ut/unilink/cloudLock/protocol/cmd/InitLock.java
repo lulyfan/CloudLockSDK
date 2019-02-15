@@ -14,6 +14,11 @@ public class InitLock extends BleCmdBase<InitLock.Data>{
     private byte[] openLockPassword = new byte[6];
     private byte[] secretKey = new byte[8];     //密钥
     private byte encryptVersion;         //加密版本
+    private String checkCode;
+
+    public InitLock(String checkCode) {
+        this.checkCode = checkCode;
+    }
 
     @Override
     public BleMsg build() {
@@ -29,8 +34,12 @@ public class InitLock extends BleCmdBase<InitLock.Data>{
         buffer.put(encryptVersion);
         buffer.put(secretKey);
         buffer.putShort((short) autoIncreaseNum);
-        msg.setContent(buffer.array());
 
+        if (checkCode != null && !"".equals(checkCode.trim())) {
+            buffer.put(checkCode.getBytes());
+        }
+
+        msg.setContent(buffer.array());
         return msg;
     }
 

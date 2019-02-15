@@ -249,6 +249,17 @@ public class Unilink {
      * @param callBack   操作回调接口，初始化成功会返回CloudLock对象
      */
     public void initLock(final ScanDevice scanDevice, final CallBack callBack) {
+        initLock(scanDevice, null, callBack);
+    }
+
+    /**
+     * 初始化云锁设备
+     *
+     * @param scanDevice 蓝牙低功耗设备
+     * @param checkCode 锁的认证密码
+     * @param callBack   操作回调接口，初始化成功会返回CloudLock对象
+     */
+    public void initLock(final ScanDevice scanDevice, String checkCode, final CallBack callBack) {
 
         final String address = scanDevice.getAddress();
         final ClientHelper clientHelper = mConnectionManager.getBleHelper(address);
@@ -257,7 +268,7 @@ public class Unilink {
             return;
         }
 
-        final InitLock initLock = new InitLock();
+        final InitLock initLock = new InitLock(checkCode);
         initLock.setClientHelper(clientHelper);
         initLock.sendMsg(new BleCallBack<InitLock.Data>() {
             @Override
@@ -368,7 +379,7 @@ public class Unilink {
     /**
      * 对指定云锁设备进行开锁操作
      *
-     * @param lock     表示某个云锁设备， 初始化云锁成功后{@link #initLock(ScanDevice, CallBack)}会返回相应CloudLock对象
+     * @param lock     表示某个云锁设备， 初始化云锁成功后{@link #initLock(ScanDevice, String, CallBack)} 会返回相应CloudLock对象
      * @param callBack 操作回调接口
      */
     public void openLock(final CloudLock lock, final CallBack callBack) {
@@ -417,7 +428,7 @@ public class Unilink {
     /**
      * 控制指定云锁设备的电机进行正转操作
      *
-     * @param lock     表示某个云锁设备， 初始化云锁成功后{@link #initLock(ScanDevice, CallBack)}会返回相应CloudLock对象
+     * @param lock     表示某个云锁设备， 初始化云锁成功后{@link #initLock(ScanDevice, String, CallBack)}会返回相应CloudLock对象
      * @param callBack 操作回调接口
      */
     public void setMotorForward(final CloudLock lock, final CallBack callBack) {
@@ -460,7 +471,7 @@ public class Unilink {
     /**
      * 控制指定云锁设备的电机进行反转操作
      *
-     * @param lock     表示某个云锁设备， 初始化云锁成功后{@link #initLock(ScanDevice, CallBack)}会返回相应CloudLock对象
+     * @param lock     表示某个云锁设备， 初始化云锁成功后{@link #initLock(ScanDevice, String, CallBack)}会返回相应CloudLock对象
      * @param callBack 操作回调接口
      */
     public void setMotorReverse(final CloudLock lock, final CallBack callBack) {
@@ -503,7 +514,7 @@ public class Unilink {
     /**
      * 重置指定云锁设备
      *
-     * @param lock     表示某个云锁设备， 初始化云锁成功后{@link #initLock(ScanDevice, CallBack)}会返回相应CloudLock对象
+     * @param lock     表示某个云锁设备， 初始化云锁成功后{@link #initLock(ScanDevice, String, CallBack)}会返回相应CloudLock对象
      * @param callBack 操作回调接口
      */
     public void resetLock(final CloudLock lock, final CallBack callBack) {
@@ -874,7 +885,7 @@ public class Unilink {
     /**
      * 读取自增变量
      *
-     * @param lock     表示某个云锁设备， 初始化云锁成功后{@link #initLock(ScanDevice, CallBack)}会返回相应CloudLock对象
+     * @param lock     表示某个云锁设备， 初始化云锁成功后{@link #initLock(ScanDevice, String, CallBack)}会返回相应CloudLock对象
      * @param callback 操作回调接口
      */
     public void readAutoIncreaseNum(final CloudLock lock, final CallBack callback) {

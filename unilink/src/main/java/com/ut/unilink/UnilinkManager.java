@@ -216,7 +216,20 @@ public class UnilinkManager {
      * @param callBack   操作回调接口，初始化成功会返回CloudLock对象
      */
     public void initLock(ScanDevice scanDevice, CallBack callBack) {
-        mUnilink.initLock(scanDevice, callBack);
+        initLock(scanDevice, null, callBack);
+    }
+
+    /**
+     * <p>初始化云锁设备,用于激活云锁设备。
+     * <p>调用成功后需要在5秒内调用{@link #confirmInit(CloudLock, CallBack)}进行确认初始化，确认初始化成功后，
+     * 云锁设备才成功激活
+     *
+     * @param scanDevice 蓝牙低功耗设备, 通过扫描得到{@link #scan(ScanListener, int, byte[], byte[])、 {@link #scan(ScanListener, int)}}
+     * @param checkCode 锁认证密码， 没有则传null
+     * @param callBack   操作回调接口，初始化成功会返回CloudLock对象
+     */
+    public void initLock(ScanDevice scanDevice, String checkCode, CallBack callBack) {
+        mUnilink.initLock(scanDevice, checkCode, callBack);
     }
 
     /**
