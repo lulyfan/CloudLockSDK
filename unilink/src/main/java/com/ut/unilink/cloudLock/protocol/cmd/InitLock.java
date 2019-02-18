@@ -27,7 +27,8 @@ public class InitLock extends BleCmdBase<InitLock.Data>{
         msg.setCode(CODE);
         msg.setEncryptType(BleMsg.ENCRYPT_TYPE_FIXED);
 
-        int contentLength = adminPassword.length + openLockPassword.length + secretKey.length + 1 + 2;
+        int checkCodeLength = checkCode == null ? 0 : checkCode.getBytes().length;
+        int contentLength = adminPassword.length + openLockPassword.length + secretKey.length + checkCodeLength + 1 + 2;
         ByteBuffer buffer = ByteBuffer.allocate(contentLength);
         buffer.put(adminPassword);
         buffer.put(openLockPassword);

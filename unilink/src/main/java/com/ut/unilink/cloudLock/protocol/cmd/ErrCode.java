@@ -12,6 +12,7 @@ public class ErrCode {
     public static final int ERR_OPENLOCK_PASSWORD = 0x08; //开锁密码校验失败
     public static final int ERR_ALREADY_ACTIVE = 0x09;    //重复激活错误
     public static final int ERR_NOT_ACTIVE = 0x0A;        //未激活错误
+    public static final int ERR_BIND_PASSWORD = 0x0E;     //绑定密码错误
 
     public static final int ERR_UNKNOW = 0xFF;            //未知错误
     public static final int ERR_TIMEOUT = -1;             //应答超时
@@ -64,6 +65,10 @@ public class ErrCode {
 
             case ERR_NOT_ACTIVE:
                 errMsg = "设备未激活";
+                break;
+
+            case ERR_BIND_PASSWORD:
+                errMsg = "认证密码错误";
                 break;
 
             case ERR_TIMEOUT:
