@@ -49,7 +49,8 @@ public class InitLock extends BleCmdBase<InitLock.Data>{
         byte[] content = msg.getContent();
         ByteBuffer buffer = ByteBuffer.wrap(content);
         Data data = new Data();
-        buffer.get(data.version);
+        buffer.get(data.softwareVersion);
+        buffer.get(data.protocolVersion);
         return data;
     }
 
@@ -83,6 +84,7 @@ public class InitLock extends BleCmdBase<InitLock.Data>{
     }
 
     public static class Data {
-       public byte[] version = new byte[3];
+       public byte[] softwareVersion = new byte[3];
+       public byte[] protocolVersion = new byte[2];
     }
 }

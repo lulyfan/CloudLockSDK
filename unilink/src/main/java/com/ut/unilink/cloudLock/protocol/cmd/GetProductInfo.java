@@ -21,9 +21,11 @@ public class GetProductInfo extends BleCmdBase<ProductInfo>{
     public ProductInfo parse(BleMsg msg) {
         ByteBuffer buffer = ByteBuffer.wrap(msg.getContent());
         ProductInfo data = new ProductInfo();
-        buffer.get(data.getVersion());
+        buffer.get(data.getVersionBytes());
+        buffer.get(data.getProtocolVersionBytes());
         buffer.get(data.getSerialNum());
         buffer.get(data.getVendorId());
+        data.setDeviceType(buffer.getShort());
         return data;
     }
 

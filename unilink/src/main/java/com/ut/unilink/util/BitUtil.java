@@ -17,6 +17,25 @@ public class BitUtil {
     }
 
     /**
+     * 获取相应位
+     * @param data
+     * @param startPos
+     * @param length
+     * @return
+     */
+    public static int bits(int data, int startPos, int length) {
+        if (startPos < 0 || length <= 0) {
+            throw new IllegalArgumentException("pos must >= 0 || length must > 0");
+        }
+
+        int temp = 0;
+        for (int i=startPos, j=0; j<length; i++, j++) {
+            temp = set1(temp, i);
+        }
+        return (data & temp) >>> startPos;
+    }
+
+    /**
      * 对指定位进行置一操作
      * @param data
      * @param pos

@@ -10,7 +10,7 @@ public class BleMsgTest {
 
     @Test
     public void testInitLock() {
-        InitLock initLock = new InitLock();
+        InitLock initLock = new InitLock(null);
         BleMsg msg = initLock.build();
         printf(msg);
     }
@@ -46,7 +46,7 @@ public class BleMsgTest {
     @Test
     public void encode() {
 
-        InitLock initLock = new InitLock();
+        InitLock initLock = new InitLock(null);
         BleMsg msg = initLock.build();
         byte[] key = new byte[]{0, 1, 3, 4, 5, 6, 7, 8};
 

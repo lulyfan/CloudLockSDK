@@ -26,6 +26,7 @@ import com.ut.unilink.cloudLock.protocol.data.GateLockOperateRecord;
 import com.ut.unilink.cloudLock.protocol.data.LockState;
 import com.ut.unilink.util.BitUtil;
 import com.ut.unilink.util.Log;
+import com.zhichu.nativeplugin.ble.scan.DeviceId;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -290,6 +291,32 @@ public class LockActivity extends AppCompatActivity {
 
     }
 
+    CallBack initCallback = new CallBack() {
+        @Override
+        public void onSuccess(final CloudLock cloudLock) {
+            LogInFile.write("init success time:" + TimeRecord.end("init") + "ms");
+
+            mCloudLock = cloudLock;
+            Log.i("initLock success 软件版本:" + cloudLock.getSoftwareVersion() + " 规约版本:" + cloudLock.getProtocolVersion());
+            showMsg("initLock success 软件版本:" + cloudLock.getSoftwareVersion() + " 规约版本:" + cloudLock.getProtocolVersion());
+            lockInfo.post(new Runnable() {
+                @Override
+                public void run() {
+                    System.out.println("openLock pw:" + Log.toUnsignedHex(cloudLock.getOpenLockPassword(), " "));
+                    System.out.println("admin pw:" + Log.toUnsignedHex(cloudLock.getAdminPassword(), " "));
+                    System.out.println("encrpt:" + (cloudLock.getEncryptType() == 0 ? "TEA" : "AES"));
+                    System.out.println("key:" + Log.toUnsignedHex(cloudLock.getEntryptKey()));
+                }
+            });
+        }
+
+        @Override
+        public void onFailed(int errCode, String errMsg) {
+            Log.i("initLock failed: " + errMsg);
+            showMsg("initLock failed: " + errMsg);
+        }
+    };
+
     public void onClick(View view) {
         switch (view.getId()) {
 
@@ -306,7 +333,7 @@ public class LockActivity extends AppCompatActivity {
                     mCloudLock = readLock();
                 }
 
-                if (mCloudLock == null) {
+                if (mCloudLock == null || mCloudLock.getEntryptKeyString() == null) {
                     unilinkManager.connect(device, connectListener);
                 } else {
                     unilinkManager.connect(device, mCloudLock.getEncryptType(), mCloudLock.getEntryptKeyString(),
@@ -323,34 +350,18 @@ public class LockActivity extends AppCompatActivity {
                 LogInFile.write("\nstart init...");
                 TimeRecord.start("init");
 
-                unilinkManager.initLock(device, new CallBack() {
-                    @Override
-                    public void onSuccess(final CloudLock cloudLock) {
-                        LogInFile.write("init success time:" + TimeRecord.end("init") + "ms");
-
-                        mCloudLock = cloudLock;
-                        Log.i("initLock success");
-                        showMsg("initLock success");
-                        lockInfo.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                System.out.println("openLock pw:" + Log.toUnsignedHex(cloudLock.getOpenLockPassword(), " "));
-                                System.out.println("admin pw:" + Log.toUnsignedHex(cloudLock.getAdminPassword(), " "));
-                                System.out.println("encrpt:" + (cloudLock.getEncryptType() == 0 ? "TEA" : "AES"));
-                                System.out.println("key:" + Log.toUnsignedHex(cloudLock.getEntryptKey()));
-//                                lockInfo.append("\nopenLock pw:" + Log.toUnsignedHex(cloudLock.getOpenLockPassword(), " ") + "\n");
-//                                lockInfo.append("admin pw:" + Log.toUnsignedHex(cloudLock.getAdminPassword(), " ") + "\n");
-//                                lockInfo.append("encrpt:" + (cloudLock.getEncryptType() == 0 ? "TEA" : "AES"));
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onFailed(int errCode, String errMsg) {
-                        Log.i("initLock failed: " + errMsg);
-                        showMsg("initLock failed: " + errMsg);
-                    }
-                });
+                if (device.getDeviceId() == DeviceId.GATE_LOCK) {
+                    BindCheckDialogFragment bindCheckDialogFragment = new BindCheckDialogFragment();
+                    bindCheckDialogFragment.setBindCheckListener(new BindCheckDialogFragment.IBindCheck() {
+                        @Override
+                        public void onBindCheck(String password) {
+                            unilinkManager.initLock(device, password, initCallback);
+                        }
+                    });
+                    bindCheckDialogFragment.show(getSupportFragmentManager(), "");
+                } else {
+                    unilinkManager.initLock(device, initCallback);
+                }
                 break;
 
             case R.id.confirmInit:

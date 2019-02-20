@@ -1,5 +1,6 @@
 package com.ut.unilink.cloudLock.protocol.data;
 
+import com.ut.unilink.util.BitUtil;
 import com.ut.unilink.util.Log;
 
 public class ProductInfo {
@@ -15,23 +16,49 @@ public class ProductInfo {
 //    public byte pipelineMedian;   //流水线中位
 //    public byte pipelineLow;      //流水线低位
 
-    private byte[] version = new byte[3];
+    private byte[] softwareVersion = new byte[3];  //软件版本
+    private byte[] protocolVersion = new byte[2];  //规约版本
     private byte[] serialNum = new byte[6];
     private byte[] vendorId = new byte[4];       //厂商标识
+    private int deviceType;
 
     @Override
     public String toString() {
-        return "version:V" + Log.toUnsignedHex(version, ".")
+        return "softwareVersion:V" + Log.toUnsignedHex(softwareVersion, ".")
+                + " protocolVersion:V" + Log.toUnsignedHex(protocolVersion, ".")
                  + " serialNum:" + Log.toUnsignedHex(serialNum, "")
                  + " vendorId:" + Log.toUnsignedHex(vendorId, "");
     }
 
-    public byte[] getVersion() {
-        return version;
+    public byte[] getVersionBytes() {
+        return softwareVersion;
     }
 
-    public void setVersion(byte[] version) {
-        this.version = version;
+    public String getSoftwareVersion() {
+//        String version = "V";
+//        version += BitUtil.bits(softwareVersion[0], 0, 4) + ".";
+//        version += BitUtil.bits(softwareVersion[1], 4, 4) * 10 + BitUtil.bits(softwareVersion[1], 0, 4) + ".";
+//        version += BitUtil.bits(softwareVersion[2], 4, 4) * 10 + BitUtil.bits(softwareVersion[2], 0, 4);
+        return "V" + Log.toUnsignedHex(softwareVersion, ".").substring(1);
+    }
+
+    public String getProtocolVersion() {
+//        String version = "V";
+//        version += BitUtil.bits(protocolVersion[0], 0, 4) + ".";
+//        version += BitUtil.bits(protocolVersion[1], 4, 4) * 10 + BitUtil.bits(protocolVersion[1], 0, 4);
+        return "V" + Log.toUnsignedHex(protocolVersion, ".").substring(1);
+    }
+
+    public void setSoftwareVersion(byte[] softwareVersion) {
+        this.softwareVersion = softwareVersion;
+    }
+
+    public byte[] getProtocolVersionBytes() {
+        return protocolVersion;
+    }
+
+    public void setProtocolVersion(byte[] protocolVersion) {
+        this.protocolVersion = protocolVersion;
     }
 
     public byte[] getSerialNum() {
@@ -48,5 +75,13 @@ public class ProductInfo {
 
     public void setVendorId(byte[] vendorId) {
         this.vendorId = vendorId;
+    }
+
+    public int getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(int deviceType) {
+        this.deviceType = deviceType;
     }
 }

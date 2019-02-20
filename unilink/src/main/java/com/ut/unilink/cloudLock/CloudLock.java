@@ -319,15 +319,26 @@ public class CloudLock {
     }
 
     /**
-     * 获取设备的版本
+     * 获取设备的软件版本
      *
      * @return
      */
-    public byte[] getVersion() {
+    public String getSoftwareVersion() {
         if (productInfo == null) {
             return null;
         }
-        return productInfo.getVersion();
+        return productInfo.getSoftwareVersion();
+    }
+
+    /**
+     * 获取设备的规约版本
+     * @return
+     */
+    public String getProtocolVersion() {
+        if (productInfo == null) {
+            return null;
+        }
+        return productInfo.getProtocolVersion();
     }
 
     public String getAdminPasswordString() {

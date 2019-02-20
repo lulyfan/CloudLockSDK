@@ -35,11 +35,9 @@ import com.ut.unilink.cloudLock.protocol.data.AuthCountInfo;
 import com.ut.unilink.cloudLock.protocol.data.AuthInfo;
 import com.ut.unilink.cloudLock.protocol.data.CloudLockNodeInfo;
 import com.ut.unilink.cloudLock.protocol.data.CloudLockOperateRecord;
-import com.ut.unilink.cloudLock.protocol.data.DeviceNodeInfo;
 import com.ut.unilink.cloudLock.protocol.data.GateLockKey;
 import com.ut.unilink.cloudLock.protocol.data.GateLockNodeInfo;
 import com.ut.unilink.cloudLock.protocol.data.GateLockOperateRecord;
-import com.ut.unilink.cloudLock.protocol.data.GateLockState;
 import com.ut.unilink.cloudLock.protocol.data.ProductInfo;
 import com.ut.unilink.util.Base64;
 import com.ut.unilink.util.Log;
@@ -283,7 +281,8 @@ public class Unilink {
                     cloudLock.setEncryptType(initLock.getEncryptVersion());
 
                     ProductInfo productInfo = new ProductInfo();
-                    productInfo.setVersion(data.version);
+                    productInfo.setSoftwareVersion(data.softwareVersion);
+                    productInfo.setProtocolVersion(data.protocolVersion);
                     cloudLock.setProductInfo(productInfo);
                     setEncryptType(address, initLock.getEncryptVersion(), Base64.encode(initLock.getSecretKey()));
 

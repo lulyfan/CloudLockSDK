@@ -16,6 +16,10 @@ public class Base64 {
     }
 
     public static String encode(byte[] data) {
+        if (data == null) {
+            return null;
+        }
+
         int start = 0;
         int len = data.length;
         StringBuffer buf = new StringBuffer(data.length * 3 / 2);
