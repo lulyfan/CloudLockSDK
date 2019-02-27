@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
             public void onFinish(List<ScanDevice> scanDevices) {
                 progressBar.setVisibility(View.GONE);
             }
-        }, 5, vendorId, deviceType);
+        }, 10, vendorId, deviceType);
 
         switch (result) {
             case 0:

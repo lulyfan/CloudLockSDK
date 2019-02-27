@@ -48,6 +48,7 @@ public class ScanCallback extends android.bluetooth.le.ScanCallback implements I
         if (LOLLIPOP()) {
             scanFilterList = new ArrayList<>();
             scanSettingsBuilder = new ScanSettings.Builder();
+            scanSettingsBuilder.setScanMode(ScanSettings.SCAN_MODE_BALANCED);
         }
     }
 
