@@ -76,14 +76,14 @@ public class CloudLockFilter extends DeviceFilter {
 
         //寻找类型为0xFF的广播包
         while (buffer.hasRemaining()) {
-            int length = buffer.get();
+            int length = buffer.get() & 0xFF;
+            if (length < 17 || buffer.remaining() < length) {
+                continue;
+            }
+
             byte[] itemBuffer = new byte[length + 1];
             itemBuffer[0] = (byte) length;
             buffer.get(itemBuffer, 1, length);
-
-            if (length < 17) {
-                continue;
-            }
 
             if (itemBuffer[1] == (byte) 0xff && itemBuffer[2] == (byte) 0x55 && itemBuffer[3] == (byte) 0x54) {
                 msg = itemBuffer;
